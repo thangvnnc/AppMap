@@ -106,9 +106,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         currentLocationOnLoad();
 
-        LatLng tLatLng = new LatLng(10.814754f, 106.672236f);
-        LatLng fLatLng = new LatLng(10.828309f, 106.669633f);
-        startIntentGoogleMapApp(fLatLng, tLatLng);
+//        LatLng tLatLng = new LatLng(10.814754f, 106.672236f);
+//        LatLng fLatLng = new LatLng(10.828309f, 106.669633f);
+//        startIntentGoogleMapApp(fLatLng, tLatLng);
     }
 
     private void startIntentGoogleMapApp(LatLng fromLatLng, LatLng toLatLng) {
