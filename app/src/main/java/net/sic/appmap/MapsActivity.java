@@ -7,16 +7,13 @@ import androidx.fragment.app.FragmentActivity;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -25,10 +22,10 @@ import com.directions.route.Route;
 import com.directions.route.RouteException;
 import com.directions.route.Routing;
 import com.directions.route.RoutingListener;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -36,10 +33,16 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -55,21 +58,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Marker mMarkerCurrent = null;
     private List<Marker> mMarkerTargetLocations = new ArrayList<>();
     private List<Polyline> mPolylines = new ArrayList<>();
-    private List<Marker> drawMarkerLineLocations = new ArrayList<>();
+    private List<Marker> mDrawMarkerLineLocations = new ArrayList<>();
+    private Button btnCenterMarker = null;
 
-    // Bearing
-    private SensorManager mSensorManager;
-    private Sensor accelerometer;
-    private Sensor magnetometer;
-    private float[] mGravity;
-    private float[] mGeomagnetic;
-    private Float azimut;
+//    // Bearing
+//    private SensorManager mSensorManager;
+//    private Sensor accelerometer;
+//    private Sensor magnetometer;
+//    private float[] mGravity;
+//    private float[] mGeomagnetic;
+//    private Float azimut;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         mActivity = this;
+        btnCenterMarker = findViewById(R.id.btnCenterMarker);
+        btnCenterMarker.setOnClickListener(btnCenterClick);
+
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), getString(R.string.key_google_api), Locale.US);
+        }
+        // Initialize the AutocompleteSupportFragment.
+        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+        // Specify the types of place data to return.
+        if (autocompleteFragment != null) {
+            autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
+            // Set up a PlaceSelectionListener to handle the response.
+            autocompleteFragment.setOnPlaceSelectedListener(placeSelectionListener);
+        }
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -78,52 +97,109 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mapFragment.getMapAsync(this);
 
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+//        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+//        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+//        magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
         currentLocationOnLoad();
     }
 
-    private SensorEventListener sensorEventListener = new SensorEventListener() {
+    private Marker mPlaceMarkerLine = null;
+    private final PlaceSelectionListener placeSelectionListener = new PlaceSelectionListener() {
+
         @Override
-        public void onSensorChanged(SensorEvent event) {
-            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
-                mGravity = event.values;
-            if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
-                mGeomagnetic = event.values;
-            if (mGravity != null && mGeomagnetic != null) {
-                float R[] = new float[9];
-                float I[] = new float[9];
-                boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
-                if (success) {
-                    float orientation[] = new float[3];
-                    SensorManager.getOrientation(R, orientation);
-                    azimut = orientation[0]; // orientation contains: azimut, pitch and roll
-                    float bearing = (float) Math.toDegrees(azimut);
-                    Log.v("", "bearing: " + bearing);
-                    if (mMarkerCurrent != null) {
-                        mMarkerCurrent.setRotation(bearing);
-                    }
+        public void onPlaceSelected(@NonNull Place place) {
+            // TODO: Get info about the selected place.
+            Log.i("MapsActivity", "Place: " + place.getName() + ", " + place.getId());
+            Log.i("MapsActivity", "Lat lng: " + place.getLatLng().latitude + ", " + place.getLatLng().longitude);
+
+            if (mMap != null) {
+                if (mPlaceMarkerLine != null) {
+                    mPlaceMarkerLine.remove();
+                    mPlaceMarkerLine = null;
                 }
+                MarkerOptions plusMarker = new MarkerOptions();
+                plusMarker.position(place.getLatLng());
+                plusMarker.title("Plus");
+                mPlaceMarkerLine = mMap.addMarker(plusMarker);
+                CameraUpdate center = CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 16);
+                mMap.animateCamera(center);
             }
         }
 
         @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
+        public void onError(@NonNull Status status) {
+            // TODO: Handle the error.
+            Log.i("MapsActivity", "An error occurred: " + status);
         }
     };
 
+    private Marker mCenterMarker = null;
+    private final View.OnClickListener btnCenterClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (mMap != null) {
+                if (mCenterMarker != null) {
+                    mCenterMarker.remove();
+                    mCenterMarker = null;
+                }
+                LatLng centerLatLang = mMap.getProjection().getVisibleRegion().latLngBounds.getCenter();
+                MarkerOptions centerMarker = new MarkerOptions();
+                centerMarker.position(centerLatLang);
+                centerMarker.title("Center");
+                mCenterMarker = mMap.addMarker(centerMarker);
+            }
+        }
+    };
+
+//    private SensorEventListener sensorEventListener = new SensorEventListener() {
+//        @Override
+//        public void onSensorChanged(SensorEvent event) {
+//            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+//                mGravity = event.values;
+//            if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
+//                mGeomagnetic = event.values;
+//            if (mGravity != null && mGeomagnetic != null) {
+//                float R[] = new float[9];
+//                float I[] = new float[9];
+//                boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
+//                if (success) {
+//                    float orientation[] = new float[3];
+//                    SensorManager.getOrientation(R, orientation);
+//                    azimut = orientation[0]; // orientation contains: azimut, pitch and roll
+//                    float bearing = (float) Math.toDegrees(azimut);
+//                    Log.v("", "bearing: " + bearing);
+//                    if (mMarkerCurrent != null) {
+//                        mMarkerCurrent.setRotation(bearing);
+//                    }
+//                }
+//            }
+//        }
+//
+//        @Override
+//        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+//
+//        }
+//    };
+
     private void clearMarkers(List<Marker> markers) {
-        for (int idxMarker = 0; idxMarker < mMarkerTargetLocations.size(); idxMarker++) {
-            mMarkerTargetLocations.get(idxMarker).remove();
-            mMarkerTargetLocations.set(idxMarker, null);
+        for (int idxMarker = 0; idxMarker < markers.size(); idxMarker++) {
+            markers.get(idxMarker).remove();
+            markers.set(idxMarker, null);
         }
         markers.clear();
     }
 
-    private GoogleMap.OnMapClickListener onCreateMarkerMapClickListener = new GoogleMap.OnMapClickListener() {
+    private void clearPolylines(List<Polyline> polylines) {
+        for (int idxPolyline = 0; idxPolyline < polylines.size(); idxPolyline++) {
+            polylines.get(idxPolyline).remove();
+            polylines.set(idxPolyline, null);
+        }
+        polylines.clear();
+    }
+
+    private final GoogleMap.OnMapClickListener onCreateMarkerMapClickListener = new GoogleMap.OnMapClickListener() {
         @Override
         public void onMapClick(LatLng latLng) {
             if (mMarkerTargetLocations.size() >= 2) {
@@ -148,12 +224,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .withListener(mRoutingListener)
                 .alternativeRoutes(true)
                 .waypoints(start, end)
-                .key("AIzaSyBFxXP2wHUUyCeoKfm6aPP_sJpqZSHAAJQ")  //also define your api key here.
+                .key(getString(R.string.key_google_api))  //also define your api key here.
                 .build();
         routing.execute();
     }
 
-    private RoutingListener mRoutingListener = new RoutingListener() {
+    private final RoutingListener mRoutingListener = new RoutingListener() {
         @Override
         public void onRoutingFailure(RouteException e) {
             View parentLayout = findViewById(android.R.id.content);
@@ -176,7 +252,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mMap.moveCamera(zoom);
 
             clearMarkers(mMarkerTargetLocations);
-            mPolylines.clear();
+            clearMarkers(mDrawMarkerLineLocations);
+            clearPolylines(mPolylines);
 
             PolylineOptions polyOptions = new PolylineOptions();
             LatLng polylineStartLatLng = null;
@@ -204,14 +281,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             fromMarker.position(polylineStartLatLng);
             fromMarker.title("From");
             Marker fromMarkerLine = mMap.addMarker(fromMarker);
-            drawMarkerLineLocations.add(fromMarkerLine);
+            mDrawMarkerLineLocations.add(fromMarkerLine);
 
             //Add Marker on route ending position
             MarkerOptions toMarker = new MarkerOptions();
             toMarker.position(polylineEndLatLng);
             toMarker.title("To");
             Marker toMarkerLine = mMap.addMarker(toMarker);
-            drawMarkerLineLocations.add(toMarkerLine);
+            mDrawMarkerLineLocations.add(toMarkerLine);
         }
 
         @Override
@@ -256,6 +333,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //Add Marker
         MarkerOptions currentMarker = new MarkerOptions();
         currentMarker.position(latLng);
+//        currentMarker.icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_marker_moto));
         currentMarker.title("Current");
         if (mMarkerCurrent != null) {
             mMarkerCurrent.remove();
@@ -311,7 +389,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             mLocationManager.requestLocationUpdates(provider, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, mLocationListener);
         }
 
-
         // Compass (la bàn)
         mMap.getUiSettings().setCompassEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
@@ -323,25 +400,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         mMap.setMyLocationEnabled(true);
-        View locationButton = ((View) mMapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
-        RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
-        rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
-        rlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-        rlp.setMargins(0, 0, 0, 400);
+        View locationButton = mMapView.findViewWithTag("GoogleMapMyLocationButton");
+        RelativeLayout.LayoutParams myLocationRlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
+        myLocationRlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+        myLocationRlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        myLocationRlp.setMargins(0, 0, 0, 300);
+
+        View compassButton = mMapView.findViewWithTag("GoogleMapCompass");
+        RelativeLayout.LayoutParams compassRlp = (RelativeLayout.LayoutParams) compassButton.getLayoutParams();
+        compassRlp.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
+        compassRlp.addRule(RelativeLayout.ALIGN_PARENT_TOP,0);
+        compassRlp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        compassRlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        compassRlp.rightMargin = compassRlp.leftMargin;
+        compassRlp.bottomMargin = 60;
+        compassButton.requestLayout();
 
         mMap.setOnMapClickListener(onCreateMarkerMapClickListener);
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mSensorManager.unregisterListener(sensorEventListener);
-    }
+//    @Override
+//    protected void onPause() {
+//        super.onPause();
+//        mSensorManager.unregisterListener(sensorEventListener);
+//    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mSensorManager.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_UI);
-        mSensorManager.registerListener(sensorEventListener, magnetometer, SensorManager.SENSOR_DELAY_UI);
-    }
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        mSensorManager.registerListener(sensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_UI);
+//        mSensorManager.registerListener(sensorEventListener, magnetometer, SensorManager.SENSOR_DELAY_UI);
+//    }
 }
