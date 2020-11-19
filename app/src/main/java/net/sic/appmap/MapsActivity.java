@@ -6,10 +6,12 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -103,6 +105,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
         currentLocationOnLoad();
+
+        LatLng tLatLng = new LatLng(10.814754f, 106.672236f);
+        LatLng fLatLng = new LatLng(10.828309f, 106.669633f);
+        startIntentGoogleMapApp(fLatLng, tLatLng);
+    }
+
+    private void startIntentGoogleMapApp(LatLng fromLatLng, LatLng toLatLng) {
+        String uri = String.format(Locale.ENGLISH, "http://maps.google.com/maps?saddr=%f,%f(%s)&daddr=%f,%f (%s)",
+                fromLatLng.latitude, fromLatLng.longitude, "Home Sweet Home",
+                toLatLng.latitude, toLatLng.longitude, "Where the party is at");
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+        intent.setPackage("com.google.android.apps.maps");
+        startActivity(intent);
     }
 
     private Marker mPlaceMarkerLine = null;
@@ -263,8 +278,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             for (int idxRoute = 0; idxRoute < routes.size(); idxRoute++) {
 
                 if (idxRoute == shortestRouteIndex) {
-                    polyOptions.color(getResources().getColor(R.color.black));
-                    polyOptions.width(7);
+                    polyOptions.color(getResources().getColor(R.color.line));
+                    polyOptions.width(16);
                     polyOptions.addAll(routes.get(shortestRouteIndex).getPoints());
                     Polyline polyline = mMap.addPolyline(polyOptions);
                     polylineStartLatLng = polyline.getPoints().get(0);
