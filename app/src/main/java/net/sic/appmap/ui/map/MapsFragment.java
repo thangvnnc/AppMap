@@ -1,8 +1,4 @@
-package net.sic.appmap;
-
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.FragmentActivity;
+package net.sic.appmap.ui.map;
 
 import android.Manifest;
 import android.app.Activity;
@@ -14,10 +10,16 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
 
 import com.directions.route.AbstractRouting;
 import com.directions.route.Route;
@@ -41,18 +43,18 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.snackbar.Snackbar;
 
+import net.sic.appmap.R;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
-
+public class MapsFragment extends Fragment implements OnMapReadyCallback {
     private final int LOCATION_REFRESH_TIME = 2;
     private final int LOCATION_REFRESH_DISTANCE = 1;
     private final int FINE_LOCATION_PERMISSION_REQUEST = 1001;
 
-    private Activity mActivity = null;
     private GoogleMap mMap = null;
     private View mMapView;
     private LocationManager mLocationManager = null;
@@ -62,8 +64,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private List<Polyline> mPolylines = new ArrayList<>();
     private List<Marker> mDrawMarkerLineLocations = new ArrayList<>();
     private Button btnCenterMarker = null;
-
-//    // Bearing
+    private View root = null;
+    //    // Bearing
 //    private SensorManager mSensorManager;
 //    private Sensor accelerometer;
 //    private Sensor magnetometer;
@@ -71,20 +73,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //    private float[] mGeomagnetic;
 //    private Float azimut;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
-        mActivity = this;
-        btnCenterMarker = findViewById(R.id.btnCenterMarker);
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container, Bundle savedInstanceState) {
+        root = inflater.inflate(R.layout.fragment_maps, container, false);
+        btnCenterMarker = root.findViewById(R.id.btnCenterMarker);
         btnCenterMarker.setOnClickListener(btnCenterClick);
 
         if (!Places.isInitialized()) {
-            Places.initialize(getApplicationContext(), getString(R.string.key_google_api), Locale.US);
+            Places.initialize(getActivity().getApplicationContext(), getString(R.string.key_google_api), Locale.US);
         }
         // Initialize the AutocompleteSupportFragment.
         AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
-                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+                getChildFragmentManager().findFragmentById(R.id.autocomplete_fragment);
         // Specify the types of place data to return.
         if (autocompleteFragment != null) {
             autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG));
@@ -93,12 +93,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
                 .findFragmentById(R.id.map);
         mMapView = mapFragment.getView();
         mapFragment.getMapAsync(this);
 
-        mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        mLocationManager = (LocationManager) getActivity().getSystemService(getActivity().LOCATION_SERVICE);
 
 //        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 //        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -109,8 +109,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        LatLng tLatLng = new LatLng(10.814754f, 106.672236f);
 //        LatLng fLatLng = new LatLng(10.828309f, 106.669633f);
 //        startIntentGoogleMapApp(fLatLng, tLatLng);
+        return root;
     }
-
     private void startIntentGoogleMapApp(LatLng fromLatLng, LatLng toLatLng) {
         String uri = String.format(Locale.ENGLISH, "http://maps.google.com/maps?saddr=%f,%f(%s)&daddr=%f,%f (%s)",
                 fromLatLng.latitude, fromLatLng.longitude, "Home Sweet Home",
@@ -247,14 +247,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private final RoutingListener mRoutingListener = new RoutingListener() {
         @Override
         public void onRoutingFailure(RouteException e) {
-            View parentLayout = findViewById(android.R.id.content);
+            View parentLayout = root.findViewById(android.R.id.content);
             Snackbar snackbar = Snackbar.make(parentLayout, e.toString(), Snackbar.LENGTH_LONG);
             snackbar.show();
         }
 
         @Override
         public void onRoutingStart() {
-            Toast.makeText(mActivity, "Finding Route...", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), "Finding Route...", Toast.LENGTH_LONG).show();
         }
 
         @Override
@@ -308,7 +308,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         @Override
         public void onRoutingCancelled() {
-            Toast.makeText(mActivity, "onRoutingCancelled", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity(), "onRoutingCancelled", Toast.LENGTH_LONG).show();
         }
     };
 
@@ -358,8 +358,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void currentLocationOnLoad() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_PERMISSION_REQUEST);
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_PERMISSION_REQUEST);
             return;
         }
         isPermissionGrantedGoogleMap = true;
@@ -389,7 +389,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
         List<String> providers = mLocationManager.getAllProviders();
         for (String provider : providers) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
                 //    ActivityCompat#requestPermissions
                 // here to request the missing permissions, and then overriding
@@ -409,8 +409,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
         // Button icon blue mylocation
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_PERMISSION_REQUEST);
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_PERMISSION_REQUEST);
             return;
         }
 
