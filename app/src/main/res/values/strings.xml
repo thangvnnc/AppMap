@@ -2,7 +2,6 @@
     <string name="app_name">Map basic</string>
     <string name="title_activity_maps">Map</string>
     <string name="key_google_api">AIzaSyBFxXP2wHUUyCeoKfm6aPP_sJpqZSHAAJQ</string>
-    <string name="title_activity_map_base">MainActivity</string>
     <string name="title_home">Home</string>
     <string name="title_navi_map">Map</string>
     <string name="title_dashboard">Dashboard</string>

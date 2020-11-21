@@ -234,7 +234,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         @Override
         public void onRoutingFailure(RouteException e) {
             View parentLayout = root.findViewById(android.R.id.content);
-            Snackbar snackbar = Snackbar.make(parentLayout, e.toString(), Snackbar.LENGTH_LONG);
+            Snackbar snackbar = Snackbar.make(parentLayout, e.getMessage(), Snackbar.LENGTH_LONG);
             snackbar.show();
         }
 
@@ -342,7 +342,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 return;
             }
             Location location = mLocationManager.getLastKnownLocation(provider);
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15));
+            if (location != null) {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15));
+            }
             mLocationManager.requestLocationUpdates(provider, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, mLocationListener);
         }
 
