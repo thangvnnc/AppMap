@@ -30,6 +30,7 @@
             </intent-filter>
         </activity>
 
+        <service android:name=".service.GPSService" android:process="net.sic.appmap.service.gps" />
     </application>
 
 </manifest>

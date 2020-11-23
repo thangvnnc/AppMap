@@ -10,6 +10,8 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import net.sic.appmap.service.GPSService;
+
 public class MapBaseActivity extends AppCompatActivity {
 
     @Override
@@ -25,6 +27,10 @@ public class MapBaseActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
+
+        if (!GPSService.isRunning(this, GPSService.class)) {
+            GPSService.startService(this);
+        }
     }
 
 }

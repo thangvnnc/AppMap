@@ -1,7 +1,10 @@
 package net.sic.appmap.ui.map;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -43,9 +46,9 @@ import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
-import com.google.android.material.snackbar.Snackbar;
 
 import net.sic.appmap.R;
+import net.sic.appmap.service.GPSService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,6 +78,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.fragment_maps, container, false);
+
         btnCenterMarker = root.findViewById(R.id.btnCenterMarker);
         btnCenterMarker.setOnClickListener(btnCenterClick);
 
@@ -107,7 +111,31 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
         mLocationManager = (LocationManager) getActivity().getSystemService(getActivity().LOCATION_SERVICE);
         currentLocationOnLoad();
+
+        getContext().registerReceiver(locationBroadcastReceiver, new IntentFilter(GPSService.KEY_BROADCAST_LOCATION));
         return root;
+    }
+
+    private BroadcastReceiver locationBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Float bearing = intent.getFloatExtra("bearing", 0);
+            double lat = intent.getDoubleExtra("lat", 0);
+            double lng = intent.getDoubleExtra("lng", 0);
+            Log.i("MapsFragment bearing:", "Bearing: " + bearing);
+            Log.i("MapsFragment lat:", "Lat: " + lat);
+            Log.i("MapsFragment lng:", "Lng: " + lng);
+            if (swSync.isChecked()) {
+                LatLng currentLatLng = new LatLng(lat, lng);
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
+            }
+        }
+    };
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        getContext().unregisterReceiver(locationBroadcastReceiver);
     }
 
     @Override
@@ -233,9 +261,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     private final RoutingListener mRoutingListener = new RoutingListener() {
         @Override
         public void onRoutingFailure(RouteException e) {
-            View parentLayout = root.findViewById(android.R.id.content);
-            Snackbar snackbar = Snackbar.make(parentLayout, e.getMessage(), Snackbar.LENGTH_LONG);
-            snackbar.show();
+//            View parentLayout = root.findViewById(android.R.id.content);
+//            Snackbar snackbar = Snackbar.make(parentLayout, e.getMessage(), Snackbar.LENGTH_LONG);
+//            snackbar.show();
         }
 
         @Override
@@ -377,4 +405,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
         mMap.setOnMapClickListener(onCreateMarkerMapClickListener);
     }
+
+//    @Override
+//    public void onReceive(Context context, Intent intent) {
+//        Log.i("MapsFragment", intent.getDoubleExtra("lat", 0) + "");
+//        Log.i("MapsFragment", intent.getDoubleExtra("lng", 0) + "");
+//        Log.i("MapsFragment", intent.getFloatExtra("bearing", 0) + "");
+//    }
 }
