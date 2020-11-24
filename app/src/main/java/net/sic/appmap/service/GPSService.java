@@ -141,8 +141,11 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
 
     private void initLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(5000);
-        mLocationRequest.setFastestInterval(2000);
+        mLocationRequest.setInterval(1000);
+        mLocationRequest.setSmallestDisplacement(1);
+        mLocationRequest.setMaxWaitTime(1000);
+        mLocationRequest.setFastestInterval(1000);
+//        mLocationRequest.setNumUpdates(5);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 

@@ -6,4 +6,8 @@
     <string name="title_navi_map">Map</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <string name="fragment_maps_btn_marker">Marker</string>
+    <string name="fragment_maps_btn_driving">Driving</string>
+    <string name="fragment_maps_btn_reserve">Reserve</string>
+    <string name="fragment_maps_sw_sync">Sync</string>
 </resources>

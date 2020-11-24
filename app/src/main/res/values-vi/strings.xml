@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Bản đồ cực dễ</string>
+    <string name="title_activity_maps">Bản đồ</string>
+    <string name="key_google_api">AIzaSyBFxXP2wHUUyCeoKfm6aPP_sJpqZSHAAJQ</string>
+    <string name="fragment_maps_sw_sync">Đồng bộ vị trí</string>
+    <string name="fragment_maps_btn_reserve">Ngược lại</string>
+    <string name="fragment_maps_btn_driving">Lái xe</string>
+    <string name="fragment_maps_btn_marker">Chọn vị trí</string>
+    <string name="title_notifications">Thông báo</string>
+    <string name="title_dashboard">Bảng chính</string>
+    <string name="title_navi_map">Bản đồ</string>
+    <string name="title_home">Trang chủ</string>
+</resources>
