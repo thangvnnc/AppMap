@@ -19,18 +19,28 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppMap">
 
+        <activity
+            android:name=".ui.stores.directions.DirectionsActivity"
+            android:label="@string/title_activity_directions" />
+        <activity
+            android:name=".ui.stores.locations.LocationsActivity"
+            android:label="@string/title_activity_locations" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-        <activity
-            android:name=".MapBaseActivity">
+
+        <activity android:name=".MainBaseActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <service android:name=".service.GPSService" android:process="net.sic.appmap.service.gps" />
+        <service
+            android:name=".service.GPSService"
+            android:process="net.sic.appmap.service.gps" />
     </application>
 
 </manifest>

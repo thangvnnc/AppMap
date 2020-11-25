@@ -7,6 +7,11 @@
         android:title="@string/title_navi_map" />
 
     <item
+        android:id="@+id/navigation_stores"
+        android:icon="@drawable/ic_notifications_black_24dp"
+        android:title="@string/title_stores" />
+
+    <item
         android:id="@+id/navigation_notifications"
         android:icon="@drawable/ic_notifications_black_24dp"
         android:title="@string/title_notifications" />

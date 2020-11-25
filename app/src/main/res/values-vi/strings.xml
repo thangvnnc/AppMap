@@ -2,7 +2,6 @@
 <resources>
     <string name="app_name">Bản đồ cực dễ</string>
     <string name="title_activity_maps">Bản đồ</string>
-    <string name="key_google_api">AIzaSyBFxXP2wHUUyCeoKfm6aPP_sJpqZSHAAJQ</string>
     <string name="fragment_maps_sw_sync">Đồng bộ vị trí</string>
     <string name="fragment_maps_btn_reserve">Ngược lại</string>
     <string name="fragment_maps_btn_driving">Lái xe</string>
@@ -11,4 +10,8 @@
     <string name="title_dashboard">Bảng chính</string>
     <string name="title_navi_map">Bản đồ</string>
     <string name="title_home">Trang chủ</string>
+    <string name="title_stores">Lưu trữ</string>
+    <string name="title_navi_store">Lưu trữ</string>
+    <string name="title_activity_locations">Các địa điểm</string>
+    <string name="title_activity_directions">Các tuyến đường</string>
 </resources>

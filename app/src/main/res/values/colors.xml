@@ -9,4 +9,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="line">#FF3700B3</color>
 
+    <color name="text">#FF000000</color>
+
 </resources>

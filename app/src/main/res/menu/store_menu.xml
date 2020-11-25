@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/store_menu_item_location"
+        android:icon="@drawable/ic_maps_black_24"
+        android:title="Location" />
+
+    <item
+        android:id="@+id/store_menu_item_direction"
+        android:icon="@drawable/ic_notifications_black_24dp"
+        android:title="Direction" />
+
+    <item
+        android:id="@+id/store_menu_item_sos"
+        android:icon="@drawable/ic_notifications_black_24dp"
+        android:title="SOS" />
+
+</menu>
