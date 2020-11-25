@@ -15,5 +15,8 @@
     <string name="fragment_maps_btn_reserve">Reserve</string>
     <string name="fragment_maps_sw_sync">Sync</string>
     <string name="title_stores">Store</string>
+    <string name="store_menu_item_location">Locations</string>
+    <string name="store_menu_item_direction">Directions</string>
+    <string name="store_menu_item_sos">SOS</string>
 
 </resources>

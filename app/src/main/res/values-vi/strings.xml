@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Bản đồ cực dễ</string>
+    <string name="app_name">Bản đồ</string>
     <string name="title_activity_maps">Bản đồ</string>
     <string name="fragment_maps_sw_sync">Đồng bộ vị trí</string>
     <string name="fragment_maps_btn_reserve">Ngược lại</string>
@@ -12,6 +12,9 @@
     <string name="title_home">Trang chủ</string>
     <string name="title_stores">Lưu trữ</string>
     <string name="title_navi_store">Lưu trữ</string>
-    <string name="title_activity_locations">Các địa điểm</string>
-    <string name="title_activity_directions">Các tuyến đường</string>
+    <string name="title_activity_locations">Danh sách địa điểm</string>
+    <string name="title_activity_directions">Danh sách dẫn đường</string>
+    <string name="store_menu_item_location">Địa điểm đã lưu</string>
+    <string name="store_menu_item_direction">Dẫn đường đã lưu</string>
+    <string name="store_menu_item_sos">Vị trí khẩn cấp</string>
 </resources>

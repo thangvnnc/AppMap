@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="net.sic.appmap">
+    package="net.thangvnnc.appmap">
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -17,20 +17,21 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:name=".application.BaseApplication"
         android:theme="@style/Theme.AppMap">
 
         <activity
-            android:name=".ui.stores.directions.DirectionsActivity"
+            android:name="net.thangvnnc.appmap.ui.stores.directions.DirectionsActivity"
             android:label="@string/title_activity_directions" />
         <activity
-            android:name=".ui.stores.locations.LocationsActivity"
+            android:name="net.thangvnnc.appmap.ui.stores.locations.LocationsActivity"
             android:label="@string/title_activity_locations" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".MainBaseActivity">
+        <activity android:name="net.thangvnnc.appmap.MainBaseActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -39,8 +40,8 @@
         </activity>
 
         <service
-            android:name=".service.GPSService"
-            android:process="net.sic.appmap.service.gps" />
+            android:name="net.thangvnnc.appmap.service.GPSService"
+            android:process="net.thangvnnc.appmap.service.gps" />
     </application>
 
 </manifest>

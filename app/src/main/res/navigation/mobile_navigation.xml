@@ -7,19 +7,19 @@
 
     <fragment
         android:id="@+id/navigation_map"
-        android:name="net.sic.appmap.ui.map.MapsFragment"
+        android:name="net.thangvnnc.appmap.ui.map.MapsFragment"
         android:label="@string/title_navi_map"
         tools:layout="@layout/fragment_maps" />
 
     <fragment
         android:id="@+id/navigation_stores"
-        android:name="net.sic.appmap.ui.stores.StoresFragment"
+        android:name="net.thangvnnc.appmap.ui.stores.StoresFragment"
         android:label="@string/title_navi_store"
         tools:layout="@layout/fragment_stores" />
 
     <fragment
         android:id="@+id/navigation_notifications"
-        android:name="net.sic.appmap.ui.notifications.NotificationsFragment"
+        android:name="net.thangvnnc.appmap.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
 </navigation>

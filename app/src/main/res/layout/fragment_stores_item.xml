@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <LinearLayout
@@ -16,18 +16,18 @@
         <ImageView
             android:id="@+id/imgRow"
             android:src="@drawable/ic_maps_black_24"
-            android:layout_width="100dp"
-            android:layout_height="100dp"/>
+            android:layout_width="60dp"
+            android:layout_height="60dp"/>
 
         <TextView
             android:id="@+id/txtTitle"
             android:layout_marginStart="8dp"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:text="NNNNNNNNNNNNNN NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN"
             android:ellipsize="end"
-            android:textSize="14sp"
+            android:textSize="18sp"
             tools:ignore="HardcodedText"
             android:textColor="@color/text"/>
     </LinearLayout>

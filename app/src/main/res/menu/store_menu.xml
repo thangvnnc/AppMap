@@ -3,17 +3,17 @@
 
     <item
         android:id="@+id/store_menu_item_location"
-        android:icon="@drawable/ic_maps_black_24"
-        android:title="Location" />
+        android:icon="@drawable/ic_location_24"
+        android:title="@string/store_menu_item_location" />
 
     <item
         android:id="@+id/store_menu_item_direction"
-        android:icon="@drawable/ic_notifications_black_24dp"
-        android:title="Direction" />
+        android:icon="@drawable/ic_direction_24"
+        android:title="@string/store_menu_item_direction" />
 
     <item
         android:id="@+id/store_menu_item_sos"
-        android:icon="@drawable/ic_notifications_black_24dp"
-        android:title="SOS" />
+        android:icon="@drawable/ic_sos_24"
+        android:title="@string/store_menu_item_sos" />
 
 </menu>
