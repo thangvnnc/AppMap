@@ -18,7 +18,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
@@ -26,8 +25,6 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationAvailability;
 import com.google.android.gms.location.LocationCallback;
@@ -36,11 +33,10 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-public class GPSService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    public static final String KEY_BROADCAST_LOCATION = "gpsservice";
+public class GPSService extends Service {
+    public static final String KEY_BROADCAST_LOCATION = "net.thangvnnc.appmap.gpsservice";
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationRequest mLocationRequest;
-    private GoogleApiClient mGoogleApiClient;
     private static final String LOGSERVICE = "GPSService";
 
     public static boolean isRunning(Context context, Class<?> serviceClass) {
@@ -65,26 +61,9 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     @Override
     public void onCreate() {
         super.onCreate();
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        buildGoogleApiClient();
         Log.i(LOGSERVICE, "onCreate");
 
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(LOGSERVICE, "onStartCommand");
-
-        if (!mGoogleApiClient.isConnected())
-            mGoogleApiClient.connect();
-        return START_STICKY;
-    }
-
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        Log.i(LOGSERVICE, "onConnected" + bundle);
-
+        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -108,17 +87,10 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     }
 
     @Override
-    public void onConnectionSuspended(int i) {
-        Log.i(LOGSERVICE, "onConnectionSuspended " + i);
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i(LOGSERVICE, "onStartCommand");
+        return START_STICKY;
     }
-
-//    @Override
-//    public void onLocationChanged(Location location) {
-//        Log.i(LOGSERVICE, "lat " + location.getLatitude());
-//        Log.i(LOGSERVICE, "lng " + location.getLongitude());
-//        LatLng mLocation = (new LatLng(location.getLatitude(), location.getLongitude()));
-//
-//    }
 
     @Override
     public void onDestroy() {
@@ -131,11 +103,6 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.i(LOGSERVICE, "onConnectionFailed ");
     }
 
     private void initLocationRequest() {
@@ -162,12 +129,10 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
             return;
         }
         mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
-//        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }
 
     private void stopLocationUpdates() {
         mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
-//        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
 
     private final LocationCallback mLocationCallback = new LocationCallback() {
@@ -190,13 +155,4 @@ public class GPSService extends Service implements GoogleApiClient.ConnectionCal
             super.onLocationAvailability(locationAvailability);
         }
     };
-
-    protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addOnConnectionFailedListener(this)
-                .addConnectionCallbacks(this)
-                .addApi(LocationServices.API)
-                .build();
-    }
-
 }

@@ -7,6 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -21,6 +24,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.directions.route.AbstractRouting;
@@ -34,6 +38,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -53,6 +59,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class MapsFragment extends Fragment implements OnMapReadyCallback {
     private final int LOCATION_REFRESH_TIME = 2;
@@ -83,6 +90,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         mBind.btnCenterMarker.setOnClickListener(btnCenterClick);
         mBind.btnReverse.setOnClickListener(btnReverseClick);
         mBind.btnDriving.setOnClickListener(btnDrivingClick);
+        mBind.btnClearAll.setOnClickListener(btnClearAllClick);
 
         if (!Places.isInitialized()) {
             Places.initialize(getActivity().getApplicationContext(), getString(R.string.key_google_api), Locale.US);
@@ -112,14 +120,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     private final BroadcastReceiver locationBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            float bearing = intent.getFloatExtra("bearing", 0);
+//            float bearing = intent.getFloatExtra("bearing", 0);
             double lat = intent.getDoubleExtra("lat", 0);
             double lng = intent.getDoubleExtra("lng", 0);
-            Log.i("MapsFragment bearing:", "Bearing: " + bearing);
-            Log.i("MapsFragment lat:", "Lat: " + lat);
-            Log.i("MapsFragment lng:", "Lng: " + lng);
+
             if (mBind.swSync.isChecked()) {
                 LatLng currentLatLng = new LatLng(lat, lng);
+//                checkAndDrawDirection(currentLatLng);
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
             }
         }
@@ -190,6 +197,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             }
         }
     };
+
     private final View.OnClickListener btnDrivingClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -198,6 +206,18 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 Marker endMarker = mDrawMarkerLineLocations.get(1);
                 startIntentGoogleMapApp(startMarker.getPosition(), endMarker.getPosition());
             }
+        }
+    };
+
+    private final View.OnClickListener btnClearAllClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            mBind.btnClearAll.setVisibility(View.INVISIBLE);
+            mBind.btnDriving.setVisibility(View.INVISIBLE);
+            mBind.btnReverse.setVisibility(View.INVISIBLE);
+            clearMarkers(mDrawMarkerLineLocations);
+            clearMarkers(mMarkerTargetLocations);
+            clearPolylines(mPolylines);
         }
     };
 
@@ -225,19 +245,41 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     };
 
     private void checkAndDrawDirection(LatLng latLng) {
-        if (mMarkerTargetLocations.size() >= 2) {
-            clearMarkers(mMarkerTargetLocations);
+        mBind.btnClearAll.setVisibility(View.VISIBLE);
+
+        Drawable drawable = null;
+        String title = "Marker";
+        if (mMarkerTargetLocations.size() == 0) {
+            drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_marker_start);
         }
-        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("Localtion index: " + (mMarkerTargetLocations.size() + 1));
+        if (mMarkerTargetLocations.size() == 1) {
+            drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_marker_end);
+        }
+        else {
+            clearMarkers(mDrawMarkerLineLocations);
+            clearPolylines(mPolylines);
+        }
+
+        BitmapDescriptor markerIcon = getMarkerIconFromDrawable(Objects.requireNonNull(drawable));
+        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(title);
+        markerOptions.icon(markerIcon);
         Marker marker = mMap.addMarker(markerOptions);
         mMarkerTargetLocations.add(marker);
 
         if (mMarkerTargetLocations.size() == 2) {
             Marker startMarker = mMarkerTargetLocations.get(0);
             Marker endMarker = mMarkerTargetLocations.get(1);
-
             drawDirection(startMarker.getPosition(), endMarker.getPosition());
         }
+    }
+
+    private BitmapDescriptor getMarkerIconFromDrawable(Drawable drawable) {
+        Canvas canvas = new Canvas();
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        canvas.setBitmap(bitmap);
+        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+        drawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
     private void drawDirection(LatLng start, LatLng end) {
@@ -246,7 +288,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 .withListener(mRoutingListener)
                 .alternativeRoutes(true)
                 .waypoints(start, end)
-                .key(getString(R.string.key_google_api))  //also define your api key here.
+                .key(getString(R.string.key_google_api))
                 .build();
         routing.execute();
     }
@@ -267,6 +309,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
         @Override
         public void onRoutingSuccess(ArrayList<Route> routes, int shortestRouteIndex) {
+            mBind.btnClearAll.setVisibility(View.VISIBLE);
+            mBind.btnDriving.setVisibility(View.VISIBLE);
+            mBind.btnReverse.setVisibility(View.VISIBLE);
             clearMarkers(mDrawMarkerLineLocations);
             clearMarkers(mMarkerTargetLocations);
             clearPolylines(mPolylines);
@@ -287,22 +332,26 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                     int k = polyline.getPoints().size();
                     polylineEndLatLng = polyline.getPoints().get(k - 1);
                     mPolylines.add(polyline);
-                } else {
-
                 }
             }
 
             //Add Marker on route starting position
+            Drawable drawableStart = ContextCompat.getDrawable(mContext, R.drawable.ic_marker_start);
+            BitmapDescriptor markerStartIcon = getMarkerIconFromDrawable(Objects.requireNonNull(drawableStart));
             MarkerOptions fromMarker = new MarkerOptions();
-            fromMarker.position(polylineStartLatLng);
-            fromMarker.title("From");
+            fromMarker.position(Objects.requireNonNull(polylineStartLatLng));
+            fromMarker.icon(markerStartIcon);
+            fromMarker.title("Start");
             Marker fromMarkerLine = mMap.addMarker(fromMarker);
             mDrawMarkerLineLocations.add(fromMarkerLine);
 
             //Add Marker on route ending position
+            Drawable drawableEnd = ContextCompat.getDrawable(mContext, R.drawable.ic_marker_end);
+            BitmapDescriptor markerEndIcon = getMarkerIconFromDrawable(Objects.requireNonNull(drawableEnd));
             MarkerOptions toMarker = new MarkerOptions();
+            toMarker.icon(markerEndIcon);
             toMarker.position(polylineEndLatLng);
-            toMarker.title("To");
+            toMarker.title("End");
             Marker toMarkerLine = mMap.addMarker(toMarker);
             mDrawMarkerLineLocations.add(toMarkerLine);
 
@@ -321,7 +370,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         }
     };
 
-    private LocationListener mLocationListener = new LocationListener() {
+    private final LocationListener mLocationListener = new LocationListener() {
         @Override
         public void onLocationChanged(@NonNull Location location) {
             if (mBind.swSync.isChecked()) {

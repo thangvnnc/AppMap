@@ -14,12 +14,15 @@ public class FirebaseDB {
         public String description;
         public float lat;
         public float lng;
+        public boolean isUsing;
         public Date createdAt;
+        public Date updatedAt;
 
         public FBLocation() {
         }
 
-        public void writeNewUser() {
+        public void insertOrUpdateUser() {
+            updatedAt = new Date();
             mDatabase.child("Locations").child(this.id).setValue(this);
         }
 

@@ -20,7 +20,6 @@ public class LocationsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         mContext = this;
         mBind = ActivityLocationsBinding.inflate(LayoutInflater.from(mContext));
-        mBind.btnFloatingActionAdd.setOnClickListener(btnFloatingActionAddClick);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(mBind.getRoot());
     }
@@ -33,11 +32,4 @@ public class LocationsActivity extends AppCompatActivity {
         }
         throw new IllegalStateException("Unexpected value: " + item.getItemId());
     }
-
-    private final View.OnClickListener btnFloatingActionAddClick = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Toast.makeText(mContext, "a", Toast.LENGTH_SHORT).show();
-        }
-    };
 }
