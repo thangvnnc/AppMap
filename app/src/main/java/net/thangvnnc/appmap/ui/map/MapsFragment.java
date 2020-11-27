@@ -1,9 +1,11 @@
 package net.thangvnnc.appmap.ui.map;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -49,10 +51,13 @@ import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import net.thangvnnc.appmap.R;
+import net.thangvnnc.appmap.database.FirebaseDB;
 import net.thangvnnc.appmap.databinding.FragmentMapsBinding;
 import net.thangvnnc.appmap.service.GPSService;
+import net.thangvnnc.appmap.ui.stores.locations.LocationDetailsActivity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -91,6 +96,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         mBind.btnReverse.setOnClickListener(btnReverseClick);
         mBind.btnDriving.setOnClickListener(btnDrivingClick);
         mBind.btnClearAll.setOnClickListener(btnClearAllClick);
+        mBind.btnAddMarker.setOnClickListener(btnAddClick);
 
         if (!Places.isInitialized()) {
             Places.initialize(getActivity().getApplicationContext(), getString(R.string.key_google_api), Locale.US);
@@ -212,12 +218,26 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     private final View.OnClickListener btnClearAllClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            mBind.btnAddMarker.setVisibility(View.INVISIBLE);
             mBind.btnClearAll.setVisibility(View.INVISIBLE);
             mBind.btnDriving.setVisibility(View.INVISIBLE);
             mBind.btnReverse.setVisibility(View.INVISIBLE);
             clearMarkers(mDrawMarkerLineLocations);
             clearMarkers(mMarkerTargetLocations);
             clearPolylines(mPolylines);
+        }
+    };
+
+    private final View.OnClickListener btnAddClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Marker marker = mMarkerTargetLocations.get(0);
+            FirebaseDB.FBLocation fbLocation = new FirebaseDB.FBLocation();
+            fbLocation.lat = (float) marker.getPosition().latitude;
+            fbLocation.lng = (float) marker.getPosition().longitude;
+            Intent intent = new Intent(mContext, LocationDetailsActivity.class);
+            intent.putExtra("LOCATION_DETAIL", fbLocation);
+            startActivity(intent);
         }
     };
 
@@ -245,7 +265,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     };
 
     private void checkAndDrawDirection(LatLng latLng) {
+        mBind.btnAddMarker.setVisibility(View.VISIBLE);
         mBind.btnClearAll.setVisibility(View.VISIBLE);
+
+        mBind.btnDriving.setVisibility(View.INVISIBLE);
+        mBind.btnReverse.setVisibility(View.INVISIBLE);
 
         Drawable drawable = null;
         String title = "Marker";
@@ -309,7 +333,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
         @Override
         public void onRoutingSuccess(ArrayList<Route> routes, int shortestRouteIndex) {
-            mBind.btnClearAll.setVisibility(View.VISIBLE);
+            mBind.btnAddMarker.setVisibility(View.INVISIBLE);
+            mBind.btnClearAll.setVisibility(View.INVISIBLE);
+
             mBind.btnDriving.setVisibility(View.VISIBLE);
             mBind.btnReverse.setVisibility(View.VISIBLE);
             clearMarkers(mDrawMarkerLineLocations);
@@ -320,12 +346,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             LatLng polylineStartLatLng = null;
             LatLng polylineEndLatLng = null;
 
-            //add route(s) to the map using polyline
+            // Add route(s) to the map using polyline
             for (int idxRoute = 0; idxRoute < routes.size(); idxRoute++) {
-
                 if (idxRoute == shortestRouteIndex) {
                     polyOptions.color(getResources().getColor(R.color.line));
-                    polyOptions.width(16);
+                    polyOptions.width(14);
                     polyOptions.addAll(routes.get(shortestRouteIndex).getPoints());
                     Polyline polyline = mMap.addPolyline(polyOptions);
                     polylineStartLatLng = polyline.getPoints().get(0);

@@ -19,6 +19,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import net.thangvnnc.appmap.R;
 import net.thangvnnc.appmap.database.FirebaseDB;
@@ -77,35 +78,31 @@ public class LocationDetailsActivity extends AppCompatActivity {
         }
 
         ProgressDialog progressDialog = ProgressDialog.show(mContext, null, mContext.getString(R.string.message_waiting));
-        AlertDialog alertDialog = new AlertDialog.Builder(mContext, R.style.MaterialAlertDialog_MaterialComponents_Title_Text).create();
+        MaterialAlertDialogBuilder materialAlertDialogBuilder = new MaterialAlertDialogBuilder(mContext);
         fbLocationIntent.insertOrUpdateUser().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                String okMsg = mContext.getString(R.string.message_success);
-                alertDialog.setTitle(okMsg);
-                String okTitleButton = mContext.getString(R.string.alert_dialog_button_ok);
-                alertDialog.setButton(Dialog.BUTTON_POSITIVE, okTitleButton,new DialogInterface.OnClickListener(){
+                materialAlertDialogBuilder.setMessage(R.string.message_success);
+                materialAlertDialogBuilder.setPositiveButton(R.string.alert_dialog_button_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        alertDialog.dismiss();
+                        dialog.dismiss();
                         finish();
                     }
                 });
-                alertDialog.show();
+                materialAlertDialogBuilder.show();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                String failMsg = mContext.getString(R.string.message_failed);
-                alertDialog.setTitle(failMsg);
-                String okTitleButton = mContext.getString(R.string.alert_dialog_button_ok);
-                alertDialog.setButton(Dialog.BUTTON_POSITIVE, okTitleButton,new DialogInterface.OnClickListener(){
+                materialAlertDialogBuilder.setMessage(R.string.message_failed);
+                materialAlertDialogBuilder.setPositiveButton(R.string.alert_dialog_button_ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        alertDialog.dismiss();
+                        dialog.dismiss();
                     }
                 });
-                alertDialog.show();
+                materialAlertDialogBuilder.show();
             }
         }).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override

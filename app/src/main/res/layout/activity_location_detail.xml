@@ -31,7 +31,7 @@
             android:autofillHints=""
             android:gravity="top"
             android:inputType="textMultiLine"
-            android:hint="379/52/15b Quang Trung, P10, Gò Vấp, TP.HCM"
+            android:hint="Nhà riêng"
             android:minLines="3"
             android:textSize="18sp"
             tools:ignore="HardcodedText" />
@@ -47,11 +47,11 @@
         <EditText
             android:id="@+id/edtLocationDescription"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:autofillHints=""
             android:gravity="top"
-            android:hint="Ghi chú nội dung cho vị trí này"
-            android:minLines="10"
+            android:hint="379/52/15b Quang Trung, P10, Gò Vấp, TP.HCM"
+            android:minLines="6"
             android:textSize="18sp"
             android:inputType="textMultiLine"
             tools:ignore="HardcodedText" />

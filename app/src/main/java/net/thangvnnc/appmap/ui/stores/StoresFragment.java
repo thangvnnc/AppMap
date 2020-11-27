@@ -19,11 +19,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import net.thangvnnc.appmap.R;
-import net.thangvnnc.appmap.database.FirebaseDB;
 import net.thangvnnc.appmap.databinding.FragmentStoresBinding;
 import net.thangvnnc.appmap.databinding.FragmentStoresItemBinding;
 import net.thangvnnc.appmap.ui.stores.directions.DirectionsActivity;
-import net.thangvnnc.appmap.ui.stores.locations.LocationDetailsActivity;
 import net.thangvnnc.appmap.ui.stores.locations.LocationsActivity;
 
 public class StoresFragment extends Fragment {
@@ -44,19 +42,6 @@ public class StoresFragment extends Fragment {
         popupMenu.inflate(R.menu.store_menu);
         Menu menu = popupMenu.getMenu();
         initRcvStores(menu);
-
-        // Button test
-        mBind.btnAddTest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseDB.FBLocation fbLocation = new FirebaseDB.FBLocation();
-                fbLocation.lat = 10.6f;
-                fbLocation.lng = 106f;
-                Intent intent = new Intent(mContext, LocationDetailsActivity.class);
-                intent.putExtra("LOCATION_DETAIL", fbLocation);
-                startActivity(intent);
-            }
-        });
     }
 
     private void initRcvStores(Menu menu) {

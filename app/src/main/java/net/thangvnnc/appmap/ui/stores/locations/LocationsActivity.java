@@ -26,6 +26,8 @@ import net.thangvnnc.appmap.databinding.ActivityLocationsBinding;
 import net.thangvnnc.appmap.databinding.ActivityLocationsItemBinding;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class LocationsActivity extends AppCompatActivity {
@@ -63,15 +65,14 @@ public class LocationsActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 fbLocations.clear();
-
                 List<FirebaseDB.FBLocation> fbLocationGets = new ArrayList<>();
                 for (DataSnapshot postSnapshot: snapshot.getChildren()) {
                     FirebaseDB.FBLocation fbLocation = postSnapshot.getValue(FirebaseDB.FBLocation.class);
                     fbLocationGets.add(fbLocation);
                 }
                 fbLocations.addAll(fbLocationGets);
+                Collections.reverse(fbLocations);
                 mLocationsAdapter.notifyDataSetChanged();
-
                 progressDialog.dismiss();
             }
 
