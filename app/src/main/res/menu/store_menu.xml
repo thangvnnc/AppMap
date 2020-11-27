@@ -11,9 +11,9 @@
         android:icon="@drawable/ic_direction_24"
         android:title="@string/store_menu_item_direction" />
 
-    <item
-        android:id="@+id/store_menu_item_sos"
-        android:icon="@drawable/ic_sos_24"
-        android:title="@string/store_menu_item_sos" />
+    <!--    <item-->
+    <!--        android:id="@+id/store_menu_item_sos"-->
+    <!--        android:icon="@drawable/ic_sos_24"-->
+    <!--        android:title="@string/store_menu_item_sos" />-->
 
 </menu>

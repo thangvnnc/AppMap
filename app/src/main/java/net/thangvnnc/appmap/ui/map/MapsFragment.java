@@ -236,7 +236,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             fbLocation.lat = (float) marker.getPosition().latitude;
             fbLocation.lng = (float) marker.getPosition().longitude;
             Intent intent = new Intent(mContext, LocationDetailsActivity.class);
-            intent.putExtra("LOCATION_DETAIL", fbLocation);
+            intent.putExtra(LocationDetailsActivity.LOCATION_DETAIL, fbLocation);
             startActivity(intent);
         }
     };

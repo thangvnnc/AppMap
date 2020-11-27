@@ -50,7 +50,7 @@ public class StoresFragment extends Fragment {
         mBind.rcvStores.setAdapter(new StoresAdapter(menu));
 
         DividerItemDecoration itemDecorator = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL);
-        itemDecorator.setDrawable(ContextCompat.getDrawable(mContext, R.drawable.divider_rcv));
+        itemDecorator.setDrawable(ContextCompat.getDrawable(mContext, R.drawable.rcv_divider));
         mBind.rcvStores.addItemDecoration(itemDecorator);
     }
 

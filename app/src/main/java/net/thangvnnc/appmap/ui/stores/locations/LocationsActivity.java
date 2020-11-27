@@ -4,7 +4,9 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +28,6 @@ import net.thangvnnc.appmap.databinding.ActivityLocationsBinding;
 import net.thangvnnc.appmap.databinding.ActivityLocationsItemBinding;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,7 +35,7 @@ public class LocationsActivity extends AppCompatActivity {
     private static final String TAG = "LocationsActivity";
     private ActivityLocationsBinding mBind = null;
     private Context mContext = null;
-    private List<FirebaseDB.FBLocation> fbLocations = new ArrayList<>();
+    private final List<FirebaseDB.FBLocation> fbLocations = new ArrayList<>();
     private LocationsAdapter mLocationsAdapter = null;
 
     @Override
@@ -58,7 +59,7 @@ public class LocationsActivity extends AppCompatActivity {
         mBind.rcvLocations.setAdapter(mLocationsAdapter);
 
         DividerItemDecoration itemDecorator = new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL);
-        itemDecorator.setDrawable(ContextCompat.getDrawable(mContext, R.drawable.divider_rcv));
+        itemDecorator.setDrawable(ContextCompat.getDrawable(mContext, R.drawable.rcv_divider));
         mBind.rcvLocations.addItemDecoration(itemDecorator);
         ProgressDialog progressDialog = ProgressDialog.show(mContext, null, mContext.getString(R.string.message_waiting));
         FirebaseDB.FBLocation.getAll().addValueEventListener(new ValueEventListener() {
@@ -95,13 +96,42 @@ public class LocationsActivity extends AppCompatActivity {
     private class LocationsAdapter extends RecyclerView.Adapter<LocationsAdapter.LocationsViewHolder> {
         private List<FirebaseDB.FBLocation> fbLocations = null;
 
-        private class LocationsViewHolder extends RecyclerView.ViewHolder{
+        private class LocationsViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
             private ActivityLocationsItemBinding mItemBind = null;
+            private final int MENU_ITEM_EDIT = 1;
 
-            public LocationsViewHolder(ActivityLocationsItemBinding mItemBind){
+            public LocationsViewHolder(ActivityLocationsItemBinding mItemBind) {
                 super(mItemBind.getRoot());
                 this.mItemBind = mItemBind;
+                this.mItemBind.getRoot().setOnCreateContextMenuListener(this);
             }
+
+            @Override
+            public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+                MenuItem btnEditMenuItem = menu.add(Menu.NONE, MENU_ITEM_EDIT, getAdapterPosition(), R.string.locations_context_menu_item_edit);
+                btnEditMenuItem.setOnMenuItemClickListener(onEditMenu);
+            }
+
+            private final MenuItem.OnMenuItemClickListener onEditMenu = new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    int idItem = item.getItemId();
+                    int position = item.getOrder();
+
+                    switch (idItem) {
+                        case MENU_ITEM_EDIT:
+                            FirebaseDB.FBLocation fbLocation = fbLocations.get(position);
+                            Intent intent = new Intent(mContext, LocationDetailsActivity.class);
+                            intent.putExtra(LocationDetailsActivity.LOCATION_DETAIL, fbLocation);
+                            startActivity(intent);
+                            break;
+
+                        default:
+                            break;
+                    }
+                    return true;
+                }
+            };
         }
 
         public LocationsAdapter(List<FirebaseDB.FBLocation> fbLocations){
@@ -120,14 +150,6 @@ public class LocationsActivity extends AppCompatActivity {
             FirebaseDB.FBLocation fbLocation = fbLocations.get(position);
             holder.mItemBind.txtLocationName.setText(fbLocation.name);
             holder.mItemBind.txtLocationDescription.setText(fbLocation.description);
-            holder.mItemBind.btnEdit.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(mContext, LocationDetailsActivity.class);
-                    intent.putExtra(LocationDetailsActivity.LOCATION_DETAIL, fbLocation);
-                    startActivity(intent);
-                }
-            });
         }
 
         @Override
