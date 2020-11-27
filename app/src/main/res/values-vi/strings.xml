@@ -16,5 +16,13 @@
     <string name="title_activity_directions">Danh sách dẫn đường</string>
     <string name="store_menu_item_location">Địa điểm đã lưu</string>
     <string name="store_menu_item_direction">Dẫn đường đã lưu</string>
-    <string name="store_menu_item_sos">Vị trí khẩn cấp</string>
+    <string name="store_menu_item_sos">Vị trí khẩn cấp (Bệnh viện, Trụ sở công an,…)</string>
+    <string name="activity_location_detail_btn_save">Lưu</string>
+    <string name="title_activity_location_detail_txt_name">Tên địa điểm</string>
+    <string name="activity_location_detail_txt_name">Tên địa điểm</string>
+    <string name="activity_location_detail_txt_description">Ghi chú</string>
+    <string name="alert_dialog_button_ok">OK</string>
+    <string name="message_success">Thành công</string>
+    <string name="message_failed">Thất bại</string>
+    <string name="message_waiting">Đang xử lý…</string>
 </resources>

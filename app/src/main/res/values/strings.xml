@@ -3,7 +3,6 @@
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_locations">Locations</string>
     <string name="title_activity_directions">Directions</string>
-
     <string name="key_google_api" translatable="false">AIzaSyBFxXP2wHUUyCeoKfm6aPP_sJpqZSHAAJQ</string>
     <string name="title_home">Home</string>
     <string name="title_navi_map">Map</string>
@@ -18,5 +17,13 @@
     <string name="store_menu_item_location">Locations</string>
     <string name="store_menu_item_direction">Directions</string>
     <string name="store_menu_item_sos">SOS</string>
+    <string name="activity_location_detail_btn_save">Save</string>
+    <string name="title_activity_location_detail_txt_name">Location detail</string>
+    <string name="activity_location_detail_txt_name">Location name</string>
+    <string name="activity_location_detail_txt_description">Description</string>
+    <string name="alert_dialog_button_ok">OK</string>
+    <string name="message_success">Success</string>
+    <string name="message_failed">Failure</string>
+    <string name="message_waiting">Please wait a moment…</string>
 
 </resources>

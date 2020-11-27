@@ -16,6 +16,8 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rcv_locations"
+            android:padding="8dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:listitem="@layout/activity_locations_item"/>

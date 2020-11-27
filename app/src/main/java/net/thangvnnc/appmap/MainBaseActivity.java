@@ -35,15 +35,6 @@ public class MainBaseActivity extends AppCompatActivity {
         if (!GPSService.isRunning(this, GPSService.class)) {
             GPSService.startService(this);
         }
-
-//        FirebaseDB.FBLocation fbLocation = new FirebaseDB.FBLocation();
-//        fbLocation.id = "1";
-//        fbLocation.title = "title123";
-//        fbLocation.description = "description";
-//        fbLocation.createdAt = new Date();
-//        fbLocation.lat = 10.6f;
-//        fbLocation.lng = 106f;
-//        fbLocation.insertOrUpdateUser();
     }
 
 }

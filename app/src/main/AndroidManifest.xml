@@ -27,6 +27,10 @@
             android:name="net.thangvnnc.appmap.ui.stores.locations.LocationsActivity"
             android:label="@string/title_activity_locations" />
 
+        <activity
+            android:name="net.thangvnnc.appmap.ui.stores.locations.LocationDetailsActivity"
+            android:label="@string/title_activity_location_detail_txt_name" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
