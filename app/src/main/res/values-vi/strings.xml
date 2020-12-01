@@ -26,4 +26,9 @@
     <string name="message_failed">Thất bại</string>
     <string name="message_waiting">Đang xử lý…</string>
     <string name="locations_context_menu_item_edit">Thay đổi</string>
+    <string name="locations_context_menu_item_remove">Xóa</string>
+    <string name="confirm_title_remove">Xóa</string>
+    <string name="confirm_content_remove">Bạn có muốn xóa không?</string>
+    <string name="confirm_btn_ok">Có</string>
+    <string name="confirm_btn_no">Không</string>
 </resources>

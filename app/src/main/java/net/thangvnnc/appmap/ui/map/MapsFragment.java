@@ -1,11 +1,9 @@
 package net.thangvnnc.appmap.ui.map;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -51,10 +49,9 @@ import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import net.thangvnnc.appmap.R;
-import net.thangvnnc.appmap.database.FirebaseDB;
+import net.thangvnnc.appmap.database.FBLocation;
 import net.thangvnnc.appmap.databinding.FragmentMapsBinding;
 import net.thangvnnc.appmap.service.GPSService;
 import net.thangvnnc.appmap.ui.stores.locations.LocationDetailsActivity;
@@ -172,6 +169,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                     mPlaceMarkerLine.remove();
                     mPlaceMarkerLine = null;
                 }
+
+                CameraUpdate center = CameraUpdateFactory.newLatLng(place.getLatLng());
+                CameraUpdate zoom = CameraUpdateFactory.zoomTo(15);
+                mMap.moveCamera(center);
+                mMap.moveCamera(zoom);
                 checkAndDrawDirection(place.getLatLng());
             }
         }
@@ -232,7 +234,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         @Override
         public void onClick(View v) {
             Marker marker = mMarkerTargetLocations.get(0);
-            FirebaseDB.FBLocation fbLocation = new FirebaseDB.FBLocation();
+            FBLocation fbLocation = new FBLocation();
             fbLocation.lat = (float) marker.getPosition().latitude;
             fbLocation.lng = (float) marker.getPosition().longitude;
             Intent intent = new Intent(mContext, LocationDetailsActivity.class);
@@ -271,22 +273,23 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         mBind.btnDriving.setVisibility(View.INVISIBLE);
         mBind.btnReverse.setVisibility(View.INVISIBLE);
 
-        Drawable drawable = null;
         String title = "Marker";
+        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(title);
         if (mMarkerTargetLocations.size() == 0) {
-            drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_marker_start);
+            Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_marker_start);
+            BitmapDescriptor markerIcon = getMarkerIconFromDrawable(drawable);
+            markerOptions.icon(markerIcon);
         }
         if (mMarkerTargetLocations.size() == 1) {
-            drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_marker_end);
+            Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_marker_end);
+            BitmapDescriptor markerIcon = getMarkerIconFromDrawable(drawable);
+            markerOptions.icon(markerIcon);
         }
         else {
             clearMarkers(mDrawMarkerLineLocations);
             clearPolylines(mPolylines);
         }
 
-        BitmapDescriptor markerIcon = getMarkerIconFromDrawable(Objects.requireNonNull(drawable));
-        MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(title);
-        markerOptions.icon(markerIcon);
         Marker marker = mMap.addMarker(markerOptions);
         mMarkerTargetLocations.add(marker);
 
@@ -353,10 +356,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                     polyOptions.width(14);
                     polyOptions.addAll(routes.get(shortestRouteIndex).getPoints());
                     Polyline polyline = mMap.addPolyline(polyOptions);
+                    mPolylines.add(polyline);
+
                     polylineStartLatLng = polyline.getPoints().get(0);
                     int k = polyline.getPoints().size();
                     polylineEndLatLng = polyline.getPoints().get(k - 1);
-                    mPolylines.add(polyline);
                 }
             }
 

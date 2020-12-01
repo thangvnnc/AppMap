@@ -26,5 +26,10 @@
     <string name="message_failed">Failure</string>
     <string name="message_waiting">Please wait a moment…</string>
     <string name="locations_context_menu_item_edit">Edit</string>
+    <string name="locations_context_menu_item_remove">Remove</string>
+    <string name="confirm_title_remove">Remove</string>
+    <string name="confirm_content_remove">Are you sure?</string>
+    <string name="confirm_btn_ok">Yes</string>
+    <string name="confirm_btn_no">No</string>
 
 </resources>

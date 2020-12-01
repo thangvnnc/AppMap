@@ -6,6 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
+    android:padding="8dp"
+    android:background="@drawable/ripple_tap_holder"
+
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
@@ -16,8 +19,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:padding="8dp"
-        android:background="@drawable/ripple_tap_holder"
         android:orientation="vertical">
 
         <TextView
@@ -28,6 +29,7 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:ellipsize="end"
+            android:textColor="@color/text"
             tools:ignore="HardcodedText" />
 
         <TextView
@@ -38,6 +40,14 @@
             android:textSize="16sp"
             android:ellipsize="end"
             tools:ignore="HardcodedText" />
-
     </LinearLayout>
+    <ImageView
+        android:id="@+id/icSeleted"
+        android:visibility="visible"
+        android:padding="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_non_select"
+        android:contentDescription="TODO"
+        tools:ignore="ContentDescription,HardcodedText" />
 </LinearLayout>

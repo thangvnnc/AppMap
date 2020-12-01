@@ -1,7 +1,9 @@
 package net.thangvnnc.appmap.ui.stores.locations;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -18,12 +20,13 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import net.thangvnnc.appmap.R;
-import net.thangvnnc.appmap.database.FirebaseDB;
+import net.thangvnnc.appmap.database.FBLocation;
 import net.thangvnnc.appmap.databinding.ActivityLocationsBinding;
 import net.thangvnnc.appmap.databinding.ActivityLocationsItemBinding;
 
@@ -35,7 +38,8 @@ public class LocationsActivity extends AppCompatActivity {
     private static final String TAG = "LocationsActivity";
     private ActivityLocationsBinding mBind = null;
     private Context mContext = null;
-    private final List<FirebaseDB.FBLocation> fbLocations = new ArrayList<>();
+    private final List<Integer> positionSelected = new ArrayList<>();
+    private final List<FBLocation> fbLocations = new ArrayList<>();
     private LocationsAdapter mLocationsAdapter = null;
 
     @Override
@@ -62,13 +66,13 @@ public class LocationsActivity extends AppCompatActivity {
         itemDecorator.setDrawable(ContextCompat.getDrawable(mContext, R.drawable.rcv_divider));
         mBind.rcvLocations.addItemDecoration(itemDecorator);
         ProgressDialog progressDialog = ProgressDialog.show(mContext, null, mContext.getString(R.string.message_waiting));
-        FirebaseDB.FBLocation.getAll().addValueEventListener(new ValueEventListener() {
+        FBLocation.getAll().addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 fbLocations.clear();
-                List<FirebaseDB.FBLocation> fbLocationGets = new ArrayList<>();
+                List<FBLocation> fbLocationGets = new ArrayList<>();
                 for (DataSnapshot postSnapshot: snapshot.getChildren()) {
-                    FirebaseDB.FBLocation fbLocation = postSnapshot.getValue(FirebaseDB.FBLocation.class);
+                    FBLocation fbLocation = postSnapshot.getValue(FBLocation.class);
                     fbLocationGets.add(fbLocation);
                 }
                 fbLocations.addAll(fbLocationGets);
@@ -94,11 +98,12 @@ public class LocationsActivity extends AppCompatActivity {
     }
 
     private class LocationsAdapter extends RecyclerView.Adapter<LocationsAdapter.LocationsViewHolder> {
-        private List<FirebaseDB.FBLocation> fbLocations = null;
+        private List<FBLocation> fbLocations = null;
 
         private class LocationsViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
             private ActivityLocationsItemBinding mItemBind = null;
             private final int MENU_ITEM_EDIT = 1;
+            private final int MENU_ITEM_REMOVE = 2;
 
             public LocationsViewHolder(ActivityLocationsItemBinding mItemBind) {
                 super(mItemBind.getRoot());
@@ -109,21 +114,38 @@ public class LocationsActivity extends AppCompatActivity {
             @Override
             public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
                 MenuItem btnEditMenuItem = menu.add(Menu.NONE, MENU_ITEM_EDIT, getAdapterPosition(), R.string.locations_context_menu_item_edit);
-                btnEditMenuItem.setOnMenuItemClickListener(onEditMenu);
+                btnEditMenuItem.setOnMenuItemClickListener(onMenuItemClickListener);
+
+                MenuItem btnRemoveMenuItem = menu.add(Menu.NONE, MENU_ITEM_REMOVE, getAdapterPosition(), R.string.locations_context_menu_item_remove);
+                btnRemoveMenuItem.setOnMenuItemClickListener(onMenuItemClickListener);
             }
 
-            private final MenuItem.OnMenuItemClickListener onEditMenu = new MenuItem.OnMenuItemClickListener() {
+            private final MenuItem.OnMenuItemClickListener onMenuItemClickListener = new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     int idItem = item.getItemId();
                     int position = item.getOrder();
+                    FBLocation fbLocation = fbLocations.get(position);
 
                     switch (idItem) {
                         case MENU_ITEM_EDIT:
-                            FirebaseDB.FBLocation fbLocation = fbLocations.get(position);
                             Intent intent = new Intent(mContext, LocationDetailsActivity.class);
                             intent.putExtra(LocationDetailsActivity.LOCATION_DETAIL, fbLocation);
                             startActivity(intent);
+                            break;
+
+                        case MENU_ITEM_REMOVE:
+                            MaterialAlertDialogBuilder materialAlertDialogBuilder = new MaterialAlertDialogBuilder(mContext);
+                            materialAlertDialogBuilder.setTitle(R.string.confirm_title_remove);
+                            materialAlertDialogBuilder.setMessage(R.string.confirm_content_remove);
+                            materialAlertDialogBuilder.setPositiveButton(R.string.confirm_btn_ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    fbLocation.remove();
+                                }
+                            });
+                            materialAlertDialogBuilder.setNegativeButton(R.string.confirm_btn_no, null);
+                            materialAlertDialogBuilder.show();
                             break;
 
                         default:
@@ -134,7 +156,7 @@ public class LocationsActivity extends AppCompatActivity {
             };
         }
 
-        public LocationsAdapter(List<FirebaseDB.FBLocation> fbLocations){
+        public LocationsAdapter(List<FBLocation> fbLocations){
             this.fbLocations = fbLocations;
         }
 
@@ -147,9 +169,32 @@ public class LocationsActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(LocationsAdapter.LocationsViewHolder holder, int position){
-            FirebaseDB.FBLocation fbLocation = fbLocations.get(position);
+            FBLocation fbLocation = fbLocations.get(position);
             holder.mItemBind.txtLocationName.setText(fbLocation.name);
             holder.mItemBind.txtLocationDescription.setText(fbLocation.description);
+            holder.mItemBind.icSeleted.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    positionSelected.add(position);
+                    mLocationsAdapter.notifyDataSetChanged();
+                }
+            });
+
+            boolean isSeleted = false;
+            for (int idxPosition: positionSelected) {
+                if (idxPosition == position) {
+                    isSeleted = true;
+                    break;
+                }
+            }
+
+            if (isSeleted) {
+                holder.mItemBind.icSeleted.setImageResource(R.drawable.ic_select);
+            }
+            else {
+                holder.mItemBind.icSeleted.setImageResource(R.drawable.ic_non_select);
+            }
+
         }
 
         @Override

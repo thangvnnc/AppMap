@@ -1,6 +1,5 @@
 package net.thangvnnc.appmap.ui.stores.locations;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,7 +10,6 @@ import android.view.MenuItem;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCanceledListener;
@@ -22,7 +20,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import net.thangvnnc.appmap.R;
-import net.thangvnnc.appmap.database.FirebaseDB;
+import net.thangvnnc.appmap.database.FBLocation;
 import net.thangvnnc.appmap.databinding.ActivityLocationDetailBinding;
 
 import java.util.Date;
@@ -30,7 +28,7 @@ import java.util.Date;
 public class LocationDetailsActivity extends AppCompatActivity {
     public static final String TAG  = "LocationDetailsActivity";
     public static final String LOCATION_DETAIL  = "LOCATION_DETAIL";
-    private FirebaseDB.FBLocation fbLocationIntent = null;
+    private FBLocation fbLocationIntent = null;
     private ActivityLocationDetailBinding mBind = null;
     private Context mContext = null;
 
@@ -45,7 +43,7 @@ public class LocationDetailsActivity extends AppCompatActivity {
     }
 
     private void initialize() {
-        fbLocationIntent = (FirebaseDB.FBLocation) getIntent().getSerializableExtra(LOCATION_DETAIL);
+        fbLocationIntent = (FBLocation) getIntent().getSerializableExtra(LOCATION_DETAIL);
         mBind.btnSave.setOnClickListener(btnSaveClick);
 
         // Edit

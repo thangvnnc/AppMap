@@ -24,6 +24,7 @@
             android:textSize="18sp"
             android:lines="3"
             android:ellipsize="end"
+            android:textColor="@color/text"
             tools:ignore="HardcodedText" />
         <ImageView
             android:src="@drawable/ic_arrow_active_top_24"
@@ -39,6 +40,7 @@
             android:textSize="18sp"
             android:lines="3"
             android:ellipsize="end"
+            android:textColor="@color/text"
             tools:ignore="HardcodedText" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
