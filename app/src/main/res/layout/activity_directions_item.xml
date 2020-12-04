@@ -11,18 +11,21 @@
         android:orientation="horizontal"
         android:paddingTop="8dp"
         android:paddingBottom="8dp"
+        android:background="@drawable/ripple_tap_holder"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:text="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+            android:id="@+id/txtFromName"
+            android:gravity="center_vertical"
+            android:text="Loading..."
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:textSize="18sp"
-            android:lines="3"
+            android:lines="2"
             android:ellipsize="end"
             android:textColor="@color/text"
             tools:ignore="HardcodedText" />
@@ -33,12 +36,14 @@
             android:contentDescription="Reverse"
             tools:ignore="HardcodedText" />
         <TextView
-            android:text="TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
+            android:id="@+id/txtToName"
+            android:gravity="center_vertical|right"
+            android:text="Loading..."
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:textSize="18sp"
-            android:lines="3"
+            android:lines="2"
             android:ellipsize="end"
             android:textColor="@color/text"
             tools:ignore="HardcodedText" />

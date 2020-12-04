@@ -439,6 +439,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(10.167444, 105.979861));
+        CameraUpdate zoom = CameraUpdateFactory.zoomTo(10);
+        mMap.moveCamera(center);
+        mMap.moveCamera(zoom);
+
         List<String> providers = mLocationManager.getAllProviders();
         for (String provider : providers) {
             if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

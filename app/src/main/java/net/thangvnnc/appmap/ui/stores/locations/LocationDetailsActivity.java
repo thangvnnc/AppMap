@@ -25,6 +25,8 @@ import net.thangvnnc.appmap.databinding.ActivityLocationDetailBinding;
 
 import java.util.Date;
 
+import static net.thangvnnc.appmap.database.FirebaseDB.generalLocationId;
+
 public class LocationDetailsActivity extends AppCompatActivity {
     public static final String TAG  = "LocationDetailsActivity";
     public static final String LOCATION_DETAIL  = "LOCATION_DETAIL";
@@ -114,10 +116,6 @@ public class LocationDetailsActivity extends AppCompatActivity {
                 Log.d(TAG, "onCanceled");
             }
         });
-    }
-
-    private String generalLocationId() {
-        return System.currentTimeMillis() + "";
     }
 
     @Override
