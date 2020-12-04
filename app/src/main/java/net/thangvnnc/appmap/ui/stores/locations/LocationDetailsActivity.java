@@ -25,7 +25,7 @@ import net.thangvnnc.appmap.databinding.ActivityLocationDetailBinding;
 
 import java.util.Date;
 
-import static net.thangvnnc.appmap.database.FirebaseDB.generalLocationId;
+import static net.thangvnnc.appmap.database.FirebaseDB.generalId;
 
 public class LocationDetailsActivity extends AppCompatActivity {
     public static final String TAG  = "LocationDetailsActivity";
@@ -72,7 +72,7 @@ public class LocationDetailsActivity extends AppCompatActivity {
 
         // Insert new
         if (fbLocationIntent.id == null) {
-            fbLocationIntent.id = generalLocationId();
+            fbLocationIntent.id = generalId();
             fbLocationIntent.createdBy = sessionUserId;
             fbLocationIntent.createdAt = new Date();
         }

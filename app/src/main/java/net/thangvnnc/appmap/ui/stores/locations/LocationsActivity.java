@@ -41,7 +41,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static net.thangvnnc.appmap.database.FirebaseDB.generalLocationId;
+import static net.thangvnnc.appmap.database.FirebaseDB.generalId;
 
 public class LocationsActivity extends AppCompatActivity {
     private static final String TAG = "LocationsActivity";
@@ -89,7 +89,7 @@ public class LocationsActivity extends AppCompatActivity {
 
         // Insert new
         if (fbDirection.id == null) {
-            fbDirection.id = generalLocationId();
+            fbDirection.id = generalId();
             fbDirection.createdBy = sessionUserId;
             fbDirection.createdAt = new Date();
         }
@@ -104,7 +104,8 @@ public class LocationsActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-                        finish();
+                        positionSelected.clear();
+                        mLocationsAdapter.notifyDataSetChanged();
                     }
                 });
                 materialAlertDialogBuilder.show();

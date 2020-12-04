@@ -9,8 +9,9 @@ public class FirebaseDB {
     public static final String FB_DB_PRIMARY_KEY_ID = "id";
     public static final DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 
-    public static String generalLocationId() {
-        return System.currentTimeMillis() + "";
+    public static String generalId() {
+        return mDatabase.push().getKey();
+//        return System.currentTimeMillis() + "";
     }
 }
 
