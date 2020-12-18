@@ -73,7 +73,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     private View mMapView;
     private LocationManager mLocationManager = null;
     private Boolean isPermissionGrantedGoogleMap = false;
-    private final Marker mMarkerCurrent = null;
     private final List<Marker> mMarkerTargetLocations = new ArrayList<>();
     private final List<Polyline> mPolylines = new ArrayList<>();
     private final List<Marker> mDrawMarkerLineLocations = new ArrayList<>();

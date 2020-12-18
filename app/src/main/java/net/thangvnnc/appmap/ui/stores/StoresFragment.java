@@ -1,23 +1,31 @@
 package net.thangvnnc.appmap.ui.stores;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import net.thangvnnc.appmap.MainBaseActivity;
 import net.thangvnnc.appmap.R;
 import net.thangvnnc.appmap.databinding.FragmentStoresBinding;
 import net.thangvnnc.appmap.databinding.FragmentStoresItemBinding;
@@ -28,14 +36,44 @@ public class StoresFragment extends Fragment {
     private static final String TAG = "StoresFragment";
     private Context mContext = null;
     private FragmentStoresBinding mBind = null;
+    StoresFragment mStoresFragment = null;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mStoresFragment = this;
+        mContext = getContext();
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         mBind = FragmentStoresBinding.inflate(inflater, container, false);
-        mContext = getContext();
         initialize();
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mMessageReceiver, new IntentFilter(DirectionsActivity.PACKAGE_BROADCAST));
         return mBind.getRoot();
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mMessageReceiver);
+    }
+
+    private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String directionId = intent.getStringExtra("directionId");
+            Toast.makeText(mContext, "Waiting...", Toast.LENGTH_SHORT).show();
+
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    ((MainBaseActivity)mStoresFragment.getActivity()).mBind.navView.setSelectedItemId(R.id.navigation_map);
+                }
+            }, 20);
+
+        }
+    };
 
     private void initialize() {
         PopupMenu popupMenu = new PopupMenu(mContext, null);

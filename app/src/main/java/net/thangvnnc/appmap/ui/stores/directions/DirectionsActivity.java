@@ -3,14 +3,17 @@ package net.thangvnnc.appmap.ui.stores.directions;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -18,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.database.DataSnapshot;
@@ -36,8 +40,12 @@ import net.thangvnnc.appmap.ui.stores.locations.LocationsActivity;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
 
 public class DirectionsActivity extends AppCompatActivity {
+    public static final String PACKAGE_BROADCAST = "net.thangvnnc.appmap.ui.stores.directions.DirectionsActivity";
+
     private static final String TAG = "DirectionsActivity";
     private ActivityDirectionsBinding mBind = null;
     private Context mContext = null;
@@ -104,7 +112,6 @@ public class DirectionsActivity extends AppCompatActivity {
 
         private class DirectionsViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
             private ActivityDirectionsItemBinding mItemBind = null;
-            private final int MENU_ITEM_EDIT = 1;
             private final int MENU_ITEM_REMOVE = 2;
 
             public DirectionsViewHolder(ActivityDirectionsItemBinding mItemBind) {
@@ -164,6 +171,7 @@ public class DirectionsActivity extends AppCompatActivity {
         public void onBindViewHolder(DirectionsAdapter.DirectionsViewHolder holder, int position){
             FBDirection fbDirection = fbDirections.get(position);
             String locationIdFirst = fbDirection.locations.get(0);
+
             FBLocation.getChild().child(locationIdFirst).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -181,13 +189,31 @@ public class DirectionsActivity extends AppCompatActivity {
             FBLocation.getChild().child(locationIdLast).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    FBLocation fbLocationFrom = snapshot.getValue(FBLocation.class);
-                    holder.mItemBind.txtToName.setText(fbLocationFrom.name);
+                    FBLocation fbLocationTo = snapshot.getValue(FBLocation.class);
+                    holder.mItemBind.txtToName.setText(fbLocationTo.name);
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
 
+                }
+            });
+
+            holder.mItemBind.viewMain.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(PACKAGE_BROADCAST);
+                    intent.putExtra("directionId", fbDirection.id);
+                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                    finish();
+                }
+            });
+
+            holder.mItemBind.viewMain.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    // Active event context menu
+                    return false;
                 }
             });
         }

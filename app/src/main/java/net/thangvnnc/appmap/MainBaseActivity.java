@@ -1,8 +1,8 @@
 package net.thangvnnc.appmap;
 
+import android.content.Context;
 import android.os.Bundle;
-
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import android.view.LayoutInflater;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -10,19 +10,19 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import net.thangvnnc.appmap.database.FirebaseDB;
+import net.thangvnnc.appmap.databinding.ActivityMainBaseBinding;
 import net.thangvnnc.appmap.service.GPSService;
 
-import java.util.Date;
-
 public class MainBaseActivity extends AppCompatActivity {
+    public ActivityMainBaseBinding mBind = null;
+    private Context mContext = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_main_base);
-        BottomNavigationView navView = findViewById(R.id.nav_view);
+        mContext = this;
+        mBind = ActivityMainBaseBinding.inflate(LayoutInflater.from(mContext));
+        setContentView(mBind.getRoot());
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
@@ -30,8 +30,7 @@ public class MainBaseActivity extends AppCompatActivity {
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-        NavigationUI.setupWithNavController(navView, navController);
-
+        NavigationUI.setupWithNavController(mBind.navView, navController);
         if (!GPSService.isRunning(this, GPSService.class)) {
             GPSService.startService(this);
         }
