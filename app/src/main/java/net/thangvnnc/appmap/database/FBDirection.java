@@ -1,5 +1,6 @@
 package net.thangvnnc.appmap.database;
 
+import com.directions.route.Route;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
@@ -16,7 +17,7 @@ public class FBDirection implements Serializable {
     public String id;
     public int step;
     public List<String> locations;
-    public List<String> locationDetails;
+    public List<Route> locationDetails;
     public boolean isUsing;
     public Date createdAt;
     public Date updatedAt;

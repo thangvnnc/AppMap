@@ -49,8 +49,13 @@ import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import net.thangvnnc.appmap.R;
+import net.thangvnnc.appmap.common.SharedPreferencesManager;
+import net.thangvnnc.appmap.database.FBDirection;
 import net.thangvnnc.appmap.database.FBLocation;
 import net.thangvnnc.appmap.databinding.FragmentMapsBinding;
 import net.thangvnnc.appmap.service.GPSService;
@@ -112,11 +117,78 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                 .findFragmentById(R.id.map);
         mMapView = mapFragment.getView();
         mapFragment.getMapAsync(this);
+        getContext().registerReceiver(locationBroadcastReceiver, new IntentFilter(GPSService.KEY_BROADCAST_LOCATION));
 
         mLocationManager = (LocationManager) getActivity().getSystemService(getActivity().LOCATION_SERVICE);
-        currentLocationOnLoad();
+    }
 
-        getContext().registerReceiver(locationBroadcastReceiver, new IntentFilter(GPSService.KEY_BROADCAST_LOCATION));
+    @Override
+    public void onResume() {
+        super.onResume();
+        actionMapResume();
+    }
+
+    private void actionMapResume() {
+        String directionId = SharedPreferencesManager.getAndRemoveString(mContext, SharedPreferencesManager.SELECTED_DIRECTION_ID);
+        if (directionId != null) {
+            showDirectionFromStore(directionId);
+            return;
+        }
+
+        getCurrentLocation();
+    }
+
+    private FBLocation[] fbLocations = {null, null};
+    private void showDirectionFromStore(String directionId) {
+        FBDirection.getChild().child(directionId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                FBDirection fbDirection = snapshot.getValue(FBDirection.class);
+                if (fbDirection != null) {
+                    String startLocationId = fbDirection.locations.get(0);
+                    FBLocation.getChild().child(startLocationId).addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            fbLocations[0] = snapshot.getValue(FBLocation.class);
+                            checkAndDrawDirectionFromStore();
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+                    String endLocationId = fbDirection.locations.get(1);
+                    FBLocation.getChild().child(endLocationId).addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            fbLocations[1] = snapshot.getValue(FBLocation.class);
+                            checkAndDrawDirectionFromStore();
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void checkAndDrawDirectionFromStore() {
+        if ((fbLocations[0] != null) && (fbLocations[1] != null)) {
+            LatLng latLngStart = new LatLng(fbLocations[0].lat, fbLocations[0].lng);
+            LatLng latLngEnd = new LatLng(fbLocations[1].lat, fbLocations[1].lng);
+            drawDirection(latLngStart, latLngEnd);
+            fbLocations = new FBLocation[]{null, null};
+        }
     }
 
     private final BroadcastReceiver locationBroadcastReceiver = new BroadcastReceiver() {
@@ -408,7 +480,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         }
     };
 
-    private void currentLocationOnLoad() {
+    private void getCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_PERMISSION_REQUEST);
             return;
@@ -429,7 +501,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             case FINE_LOCATION_PERMISSION_REQUEST: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     isPermissionGrantedGoogleMap = true;
-                    currentLocationOnLoad();
+                    actionMapResume();
                 }
             }
         }

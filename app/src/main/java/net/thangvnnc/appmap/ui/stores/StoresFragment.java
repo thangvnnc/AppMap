@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import net.thangvnnc.appmap.MainBaseActivity;
 import net.thangvnnc.appmap.R;
+import net.thangvnnc.appmap.common.SharedPreferencesManager;
 import net.thangvnnc.appmap.databinding.FragmentStoresBinding;
 import net.thangvnnc.appmap.databinding.FragmentStoresItemBinding;
 import net.thangvnnc.appmap.ui.stores.directions.DirectionsActivity;
@@ -63,15 +64,16 @@ public class StoresFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             String directionId = intent.getStringExtra("directionId");
-            Toast.makeText(mContext, "Waiting...", Toast.LENGTH_SHORT).show();
+            SharedPreferencesManager.setString(mContext, SharedPreferencesManager.SELECTED_DIRECTION_ID, directionId);
 
+            // Move MapFragment
+            Toast.makeText(mContext, "Waiting...", Toast.LENGTH_SHORT).show();
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     ((MainBaseActivity)mStoresFragment.getActivity()).mBind.navView.setSelectedItemId(R.id.navigation_map);
                 }
-            }, 20);
-
+            }, 100);
         }
     };
 
