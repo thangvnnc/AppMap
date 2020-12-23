@@ -1,4 +1,4 @@
-package net.thangvnnc.appmap;
+package net.thangvnnc.appmap.ui.main;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -10,6 +10,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import net.thangvnnc.appmap.R;
 import net.thangvnnc.appmap.databinding.ActivityMainBaseBinding;
 import net.thangvnnc.appmap.service.GPSService;
 

@@ -25,7 +25,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import net.thangvnnc.appmap.MainBaseActivity;
+import net.thangvnnc.appmap.ui.main.MainBaseActivity;
 import net.thangvnnc.appmap.R;
 import net.thangvnnc.appmap.common.SharedPreferencesManager;
 import net.thangvnnc.appmap.databinding.FragmentStoresBinding;
