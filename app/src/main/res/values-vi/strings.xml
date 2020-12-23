@@ -29,6 +29,8 @@
     <string name="locations_context_menu_item_remove">Xóa</string>
     <string name="confirm_title_remove">Xóa</string>
     <string name="confirm_content_remove">Bạn có muốn xóa không?</string>
+    <string name="confirm_title_logout">Đăng xuất</string>
+    <string name="confirm_content_logout">Bạn có muốn đăng xuất không?</string>
     <string name="confirm_btn_ok">Có</string>
     <string name="confirm_btn_no">Không</string>
 </resources>
