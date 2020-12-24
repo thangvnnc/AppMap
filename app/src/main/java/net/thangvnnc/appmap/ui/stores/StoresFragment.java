@@ -1,6 +1,7 @@
 package net.thangvnnc.appmap.ui.stores;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -66,8 +67,6 @@ public class StoresFragment extends Fragment {
             String directionId = intent.getStringExtra("directionId");
             SharedPreferencesManager.setString(mContext, SharedPreferencesManager.SELECTED_DIRECTION_ID, directionId);
 
-            // Move MapFragment
-            Toast.makeText(mContext, "Waiting...", Toast.LENGTH_SHORT).show();
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override
                 public void run() {

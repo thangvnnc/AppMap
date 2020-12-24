@@ -1,5 +1,6 @@
 package net.thangvnnc.appmap.ui.main;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 
+import net.thangvnnc.appmap.R;
 import net.thangvnnc.appmap.databinding.ActivityLoginBinding;
 
 public class LoginActivity extends AppCompatActivity {
@@ -28,6 +30,7 @@ public class LoginActivity extends AppCompatActivity {
     public ActivityLoginBinding mBind = null;
     private Context mContext = null;
     private GoogleSignInClient mGoogleSignInClient = null;
+    private ProgressDialog mProgressDialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,13 +53,13 @@ public class LoginActivity extends AppCompatActivity {
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(mContext);
         if (account != null) {
             startMainActivity();
-            return;
         }
     }
 
-    private View.OnClickListener btnSignInButtonClick = new View.OnClickListener() {
+    private final View.OnClickListener btnSignInButtonClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            mProgressDialog = ProgressDialog.show(mContext, null, mContext.getString(R.string.message_waiting));
             GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestEmail()
                     .build();
@@ -92,9 +95,13 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void startMainActivity() {
+        if (mProgressDialog != null) {
+            mProgressDialog.dismiss();
+        }
         // Signed in successfully, show authenticated UI.
         Intent intentMain = new Intent(mContext, MainBaseActivity.class);
         startActivity(intentMain);
+        finish();
     }
 
     @Override
