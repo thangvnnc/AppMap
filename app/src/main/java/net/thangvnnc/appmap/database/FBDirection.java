@@ -14,6 +14,7 @@ import static net.thangvnnc.appmap.database.FirebaseDB.FB_DB_PRIMARY_KEY_ID;
 import static net.thangvnnc.appmap.database.FirebaseDB.mDatabase;
 
 public class FBDirection implements Serializable {
+    public static final String TAG = FBDirection.class.getName();
     public String id;
     public int step;
     public List<String> locations;
@@ -39,7 +40,7 @@ public class FBDirection implements Serializable {
     public FBDirection() {
     }
 
-    public Task<Void> insertOrUpdateUser() {
+    public Task<Void> insertOrUpdate() {
         return mDatabase.child(FB_DB_NOTE_DIRECTION).child(this.id).setValue(this);
     }
 

@@ -79,7 +79,7 @@ public class LocationDetailsActivity extends AppCompatActivity {
 
         ProgressDialog progressDialog = ProgressDialog.show(mContext, null, mContext.getString(R.string.message_waiting));
         MaterialAlertDialogBuilder materialAlertDialogBuilder = new MaterialAlertDialogBuilder(mContext);
-        fbLocationIntent.insertOrUpdateUser().addOnSuccessListener(new OnSuccessListener<Void>() {
+        fbLocationIntent.insertOrUpdate().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 materialAlertDialogBuilder.setMessage(R.string.message_success);

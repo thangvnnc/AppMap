@@ -46,7 +46,7 @@ public class FBLocation implements Serializable {
     public FBLocation() {
     }
 
-    public Task<Void> insertOrUpdateUser() {
+    public Task<Void> insertOrUpdate() {
         return mDatabase.child(FB_DB_NOTE_LOCATION).child(this.id).setValue(this);
     }
 

@@ -96,7 +96,7 @@ public class LocationsActivity extends AppCompatActivity {
 
         ProgressDialog progressDialog = ProgressDialog.show(mContext, null, mContext.getString(R.string.message_waiting));
         MaterialAlertDialogBuilder materialAlertDialogBuilder = new MaterialAlertDialogBuilder(mContext);
-        fbDirection.insertOrUpdateUser().addOnSuccessListener(new OnSuccessListener<Void>() {
+        fbDirection.insertOrUpdate().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 materialAlertDialogBuilder.setMessage(R.string.message_success);

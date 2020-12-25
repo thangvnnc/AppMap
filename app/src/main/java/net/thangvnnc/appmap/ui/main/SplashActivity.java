@@ -1,19 +1,20 @@
 package net.thangvnnc.appmap.ui.main;
 
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 
 import net.thangvnnc.appmap.R;
+import net.thangvnnc.appmap.database.FBUser;
 import net.thangvnnc.appmap.databinding.ActivitySplashBinding;
 
 public class SplashActivity extends AppCompatActivity {
@@ -37,6 +38,12 @@ public class SplashActivity extends AppCompatActivity {
 
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(mContext);
         if (account != null) {
+            String imgAvatar = null;
+            Uri photoUri = account.getPhotoUrl();
+            if (photoUri != null) {
+                imgAvatar = photoUri.getPath();
+            }
+            FBUser.login(account.getId(), FBUser.TYPE.GOOGLE, account.getDisplayName(), imgAvatar);
             startMainActivity();
         }
         else {

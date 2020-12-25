@@ -3,6 +3,7 @@ package net.thangvnnc.appmap.ui.main;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,6 +22,7 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 
 import net.thangvnnc.appmap.R;
+import net.thangvnnc.appmap.database.FBUser;
 import net.thangvnnc.appmap.databinding.ActivityLoginBinding;
 
 public class LoginActivity extends AppCompatActivity {
@@ -85,6 +87,12 @@ public class LoginActivity extends AppCompatActivity {
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            String imgAvatar = null;
+            Uri photoUri = account.getPhotoUrl();
+            if (photoUri != null) {
+                imgAvatar = photoUri.getPath();
+            }
+            FBUser.login(account.getId(), FBUser.TYPE.GOOGLE, account.getDisplayName(), imgAvatar);
             startMainActivity();
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
