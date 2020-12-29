@@ -18,6 +18,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import net.thangvnnc.appmap.R;
+import net.thangvnnc.appmap.database.FBUser;
 import net.thangvnnc.appmap.databinding.ActivityMainBaseBinding;
 import net.thangvnnc.appmap.service.GPSService;
 
@@ -53,11 +54,7 @@ public class MainBaseActivity extends AppCompatActivity {
         materialAlertDialogBuilder.setPositiveButton(R.string.confirm_btn_ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestEmail()
-                        .build();
-                GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(mContext, gso);
-                googleSignInClient.signOut();
+                FBUser.logout(mContext);
                 finish();
             }
         });

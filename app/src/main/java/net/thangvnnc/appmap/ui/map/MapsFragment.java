@@ -140,47 +140,52 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     private FBLocation[] fbLocations = {null, null};
     private void showDirectionFromStore(String directionId) {
-        FBDirection.getChild().child(directionId).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                FBDirection fbDirection = snapshot.getValue(FBDirection.class);
-                if (fbDirection != null) {
-                    String startLocationId = fbDirection.locations.get(0);
-                    FBLocation.getChild().child(startLocationId).addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            fbLocations[0] = snapshot.getValue(FBLocation.class);
-                            checkAndDrawDirectionFromStore();
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-
-                    String endLocationId = fbDirection.locations.get(1);
-                    FBLocation.getChild().child(endLocationId).addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            fbLocations[1] = snapshot.getValue(FBLocation.class);
-                            checkAndDrawDirectionFromStore();
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
+        FBDirection.getChild().child(directionId).addValueEventListener(valueEventListener);
     }
+
+    private ValueEventListener valueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            FBDirection fbDirection = snapshot.getValue(FBDirection.class);
+            FBDirection.getChild().child(fbDirection.id).removeEventListener(valueEventListener);
+            fbDirection.orderByNum++;
+            fbDirection.insertOrUpdate();
+            if (fbDirection != null) {
+                String startLocationId = fbDirection.locations.get(0);
+                FBLocation.getChild().child(startLocationId).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        fbLocations[0] = snapshot.getValue(FBLocation.class);
+                        checkAndDrawDirectionFromStore();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+                String endLocationId = fbDirection.locations.get(1);
+                FBLocation.getChild().child(endLocationId).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        fbLocations[1] = snapshot.getValue(FBLocation.class);
+                        checkAndDrawDirectionFromStore();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+
+        }
+    };
 
     private void checkAndDrawDirectionFromStore() {
         if ((fbLocations[0] != null) && (fbLocations[1] != null)) {

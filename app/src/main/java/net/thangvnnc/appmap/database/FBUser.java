@@ -1,9 +1,13 @@
 package net.thangvnnc.appmap.database;
 
+import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -19,7 +23,13 @@ import static net.thangvnnc.appmap.database.FirebaseDB.FB_DB_PRIMARY_KEY_ID;
 import static net.thangvnnc.appmap.database.FirebaseDB.mDatabase;
 
 public class FBUser implements Serializable {
+    public interface LoginResult {
+        void success (FBUser fbUser);
+    }
+
+    private static FBUser session = null;
     public static final String TAG = FBUser.class.getName();
+
     public String id;
     public String typeAccount;
     public String idAcc;
@@ -44,7 +54,7 @@ public class FBUser implements Serializable {
         return mDatabase.child(FB_DB_NOTE_USER).child(id).removeValue();
     }
 
-    public static void login(String idAcc, String typeAccount, String name, String imgAvatar) {
+    public static void login(String idAcc, String typeAccount, String name, String imgAvatar, LoginResult loginResult) {
         Query query = getChild().orderByChild("idAcc").equalTo(idAcc);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -56,6 +66,9 @@ public class FBUser implements Serializable {
                         break;
                     }
                 }
+
+                // Set session
+                session = fbUser;
 
                 if (fbUser == null) {
                     fbUser = new FBUser();
@@ -74,6 +87,9 @@ public class FBUser implements Serializable {
                 fbUser.updatedBy = fbUser.id;
 
                 fbUser.insertOrUpdate();
+
+                if (loginResult == null) return;
+                loginResult.success(session);
             }
 
             @Override
@@ -81,6 +97,33 @@ public class FBUser implements Serializable {
                 Log.e(TAG, error.toString());
             }
         });
+    }
+
+    public static FBUser getSession() {
+        return session;
+    }
+
+    public static void logout(Context context) {
+        if (session == null) {
+            throw new UnsupportedOperationException("Null session FBUser");
+        }
+        switch (session.typeAccount) {
+            case TYPE.GOOGLE:
+                GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestEmail()
+                        .build();
+                GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(context, gso);
+                googleSignInClient.signOut();
+                break;
+
+            case TYPE.FACEBOOK:
+                throw new UnsupportedOperationException("Logout facebook!");
+
+            default:
+                throw new UnsupportedOperationException("Logout orther!");
+        }
+
+        session = null;
     }
 
     public FBUser() {

@@ -2,10 +2,14 @@ package net.thangvnnc.appmap.database;
 
 import com.directions.route.Route;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -19,14 +23,15 @@ public class FBDirection implements Serializable {
     public int step;
     public List<String> locations;
     public List<Route> locationDetails;
+    public int orderByNum;
     public boolean isUsing;
     public Date createdAt;
     public Date updatedAt;
-    public long createdBy;
-    public long updatedBy;
+    public String createdBy;
+    public String updatedBy;
 
     public static Query getAll() {
-        return mDatabase.child(FB_DB_NOTE_DIRECTION).orderByChild(FB_DB_PRIMARY_KEY_ID);
+        return mDatabase.child(FB_DB_NOTE_DIRECTION).orderByChild("createdBy").equalTo(FBUser.getSession().id);
     }
 
     public static DatabaseReference getChild() {
@@ -35,6 +40,20 @@ public class FBDirection implements Serializable {
 
     public static Task<Void> removeById(String id) {
         return mDatabase.child(FB_DB_NOTE_DIRECTION).child(id).removeValue();
+    }
+
+    public static List<FBDirection> parseDirections(boolean isUsing, DataSnapshot snapshot) {
+        List<FBDirection> fBDirectionGets = new ArrayList<>();
+        for (DataSnapshot postSnapshot: snapshot.getChildren()) {
+            FBDirection FBDirection = postSnapshot.getValue(FBDirection.class);
+            if (isUsing == FBDirection.isUsing) {
+                fBDirectionGets.add(FBDirection);
+            }
+        }
+
+        Collections.sort(fBDirectionGets, (o1, o2) -> o2.orderByNum - o1.orderByNum);
+
+        return fBDirectionGets;
     }
 
     public FBDirection() {

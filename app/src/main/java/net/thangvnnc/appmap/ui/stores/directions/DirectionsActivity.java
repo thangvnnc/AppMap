@@ -80,13 +80,8 @@ public class DirectionsActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 fbDirections.clear();
-                List<FBDirection> fbDirectionGets = new ArrayList<>();
-                for (DataSnapshot postSnapshot: snapshot.getChildren()) {
-                    FBDirection fbDirection = postSnapshot.getValue(FBDirection.class);
-                    fbDirectionGets.add(fbDirection);
-                }
-                fbDirections.addAll(fbDirectionGets);
-                Collections.reverse(fbDirections);
+                fbDirections.addAll(FBDirection.parseDirections(true, snapshot));
+//                Collections.reverse(fbDirections);
                 mDirectionsAdapter.notifyDataSetChanged();
                 progressDialog.dismiss();
             }

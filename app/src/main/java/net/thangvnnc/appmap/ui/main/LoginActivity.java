@@ -92,8 +92,12 @@ public class LoginActivity extends AppCompatActivity {
             if (photoUri != null) {
                 imgAvatar = photoUri.getPath();
             }
-            FBUser.login(account.getId(), FBUser.TYPE.GOOGLE, account.getDisplayName(), imgAvatar);
-            startMainActivity();
+            FBUser.login(account.getId(), FBUser.TYPE.GOOGLE, account.getDisplayName(), imgAvatar, new FBUser.LoginResult() {
+                @Override
+                public void success(FBUser fbUser) {
+                    startMainActivity();
+                }
+            });
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.

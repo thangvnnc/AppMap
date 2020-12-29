@@ -33,11 +33,11 @@ import com.google.firebase.database.ValueEventListener;
 import net.thangvnnc.appmap.R;
 import net.thangvnnc.appmap.database.FBDirection;
 import net.thangvnnc.appmap.database.FBLocation;
+import net.thangvnnc.appmap.database.FBUser;
 import net.thangvnnc.appmap.databinding.ActivityLocationsBinding;
 import net.thangvnnc.appmap.databinding.ActivityLocationsItemBinding;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -78,19 +78,18 @@ public class LocationsActivity extends AppCompatActivity {
     };
 
     private void saveDirection(List<String> locationIds) {
-        long sessionUserId = 0;
         FBDirection fbDirection = new FBDirection();
         fbDirection.locations = new ArrayList<>();
         fbDirection.locations.addAll(locationIds);
         fbDirection.locationDetails = new ArrayList<>();
         fbDirection.isUsing = true;
-        fbDirection.updatedBy = sessionUserId;
+        fbDirection.updatedBy = FBUser.getSession().id;
         fbDirection.updatedAt = new Date();
 
         // Insert new
         if (fbDirection.id == null) {
             fbDirection.id = generalId();
-            fbDirection.createdBy = sessionUserId;
+            fbDirection.createdBy = FBUser.getSession().id;
             fbDirection.createdAt = new Date();
         }
 
@@ -172,13 +171,7 @@ public class LocationsActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 fbLocations.clear();
-                List<FBLocation> fbLocationGets = new ArrayList<>();
-                for (DataSnapshot postSnapshot: snapshot.getChildren()) {
-                    FBLocation fbLocation = postSnapshot.getValue(FBLocation.class);
-                    fbLocationGets.add(fbLocation);
-                }
-                fbLocations.addAll(fbLocationGets);
-                Collections.reverse(fbLocations);
+                fbLocations.addAll(FBLocation.parseLocations(true, snapshot));
                 mLocationsAdapter.notifyDataSetChanged();
                 progressDialog.dismiss();
             }

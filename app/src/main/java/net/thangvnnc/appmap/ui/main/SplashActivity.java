@@ -43,8 +43,7 @@ public class SplashActivity extends AppCompatActivity {
             if (photoUri != null) {
                 imgAvatar = photoUri.getPath();
             }
-            FBUser.login(account.getId(), FBUser.TYPE.GOOGLE, account.getDisplayName(), imgAvatar);
-            startMainActivity();
+            FBUser.login(account.getId(), FBUser.TYPE.GOOGLE, account.getDisplayName(), imgAvatar, fbUser -> startMainActivity());
         }
         else {
             startLoginActivity();

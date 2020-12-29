@@ -21,6 +21,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import net.thangvnnc.appmap.R;
 import net.thangvnnc.appmap.database.FBLocation;
+import net.thangvnnc.appmap.database.FBUser;
 import net.thangvnnc.appmap.databinding.ActivityLocationDetailBinding;
 
 import java.util.Date;
@@ -63,19 +64,18 @@ public class LocationDetailsActivity extends AppCompatActivity {
     };
 
     private void saveLocation() {
-        long sessionUserId = 0;
-        fbLocationIntent.name = mBind.edtLocationName.getText().toString();
-        fbLocationIntent.description = mBind.edtLocationDescription.getText().toString();
-        fbLocationIntent.isUsing = true;
-        fbLocationIntent.updatedBy = sessionUserId;
-        fbLocationIntent.updatedAt = new Date();
-
         // Insert new
         if (fbLocationIntent.id == null) {
             fbLocationIntent.id = generalId();
-            fbLocationIntent.createdBy = sessionUserId;
+            fbLocationIntent.createdBy = FBUser.getSession().id;
             fbLocationIntent.createdAt = new Date();
         }
+
+        fbLocationIntent.name = mBind.edtLocationName.getText().toString();
+        fbLocationIntent.description = mBind.edtLocationDescription.getText().toString();
+        fbLocationIntent.isUsing = true;
+        fbLocationIntent.updatedBy = FBUser.getSession().id;
+        fbLocationIntent.updatedAt = new Date();
 
         ProgressDialog progressDialog = ProgressDialog.show(mContext, null, mContext.getString(R.string.message_waiting));
         MaterialAlertDialogBuilder materialAlertDialogBuilder = new MaterialAlertDialogBuilder(mContext);
