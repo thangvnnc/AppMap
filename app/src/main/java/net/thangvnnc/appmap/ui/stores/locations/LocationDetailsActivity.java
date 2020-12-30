@@ -20,18 +20,18 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import net.thangvnnc.appmap.R;
-import net.thangvnnc.appmap.database.FBLocation;
-import net.thangvnnc.appmap.database.FBUser;
+import net.thangvnnc.appmap.common.DateUtils;
+import net.thangvnnc.appmap.database.Location;
+import net.thangvnnc.appmap.database.User;
+import net.thangvnnc.appmap.database.firebase.FBLocation;
 import net.thangvnnc.appmap.databinding.ActivityLocationDetailBinding;
 
 import java.util.Date;
 
-import static net.thangvnnc.appmap.database.FirebaseDB.generalId;
-
 public class LocationDetailsActivity extends AppCompatActivity {
     public static final String TAG  = "LocationDetailsActivity";
     public static final String LOCATION_DETAIL  = "LOCATION_DETAIL";
-    private FBLocation fbLocationIntent = null;
+    private Location locationIntent = null;
     private ActivityLocationDetailBinding mBind = null;
     private Context mContext = null;
 
@@ -46,13 +46,13 @@ public class LocationDetailsActivity extends AppCompatActivity {
     }
 
     private void initialize() {
-        fbLocationIntent = (FBLocation) getIntent().getSerializableExtra(LOCATION_DETAIL);
+        locationIntent = (Location) getIntent().getSerializableExtra(LOCATION_DETAIL);
         mBind.btnSave.setOnClickListener(btnSaveClick);
 
         // Edit
-        if (fbLocationIntent.id != null) {
-            mBind.edtLocationName.setText(fbLocationIntent.name);
-            mBind.edtLocationDescription.setText(fbLocationIntent.description);
+        if (locationIntent.id != null) {
+            mBind.edtLocationName.setText(locationIntent.name);
+            mBind.edtLocationDescription.setText(locationIntent.description);
         }
     }
 
@@ -65,21 +65,21 @@ public class LocationDetailsActivity extends AppCompatActivity {
 
     private void saveLocation() {
         // Insert new
-        if (fbLocationIntent.id == null) {
-            fbLocationIntent.id = generalId();
-            fbLocationIntent.createdBy = FBUser.getSession().id;
-            fbLocationIntent.createdAt = new Date();
+        if (locationIntent.id == null) {
+            locationIntent.id = Location.generalId();
+            locationIntent.createdBy = User.getSession().id;
+            locationIntent.createdAt = DateUtils.getCurrent();
         }
 
-        fbLocationIntent.name = mBind.edtLocationName.getText().toString();
-        fbLocationIntent.description = mBind.edtLocationDescription.getText().toString();
-        fbLocationIntent.isUsing = true;
-        fbLocationIntent.updatedBy = FBUser.getSession().id;
-        fbLocationIntent.updatedAt = new Date();
+        locationIntent.name = mBind.edtLocationName.getText().toString();
+        locationIntent.description = mBind.edtLocationDescription.getText().toString();
+        locationIntent.isUsing = true;
+        locationIntent.updatedBy = User.getSession().id;
+        locationIntent.updatedAt = DateUtils.getCurrent();
 
         ProgressDialog progressDialog = ProgressDialog.show(mContext, null, mContext.getString(R.string.message_waiting));
         MaterialAlertDialogBuilder materialAlertDialogBuilder = new MaterialAlertDialogBuilder(mContext);
-        fbLocationIntent.insertOrUpdate().addOnSuccessListener(new OnSuccessListener<Void>() {
+        FBLocation.insertOrUpdate(locationIntent).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 materialAlertDialogBuilder.setMessage(R.string.message_success);

@@ -22,7 +22,7 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 
 import net.thangvnnc.appmap.R;
-import net.thangvnnc.appmap.database.FBUser;
+import net.thangvnnc.appmap.database.User;
 import net.thangvnnc.appmap.databinding.ActivityLoginBinding;
 
 public class LoginActivity extends AppCompatActivity {
@@ -45,18 +45,18 @@ public class LoginActivity extends AppCompatActivity {
         mBind = ActivityLoginBinding.inflate(LayoutInflater.from(mContext));
         setContentView(mBind.getRoot());
 
-        checkLoginExist();
+//        checkLoginExist();
 
         mBind.btnSignInButton.setSize(SignInButton.SIZE_STANDARD);
         mBind.btnSignInButton.setOnClickListener(btnSignInButtonClick);
     }
 
-    private void checkLoginExist() {
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(mContext);
-        if (account != null) {
-            startMainActivity();
-        }
-    }
+//    private void checkLoginExist() {
+//        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(mContext);
+//        if (account != null) {
+//            startMainActivity();
+//        }
+//    }
 
     private final View.OnClickListener btnSignInButtonClick = new View.OnClickListener() {
         @Override
@@ -92,16 +92,16 @@ public class LoginActivity extends AppCompatActivity {
             if (photoUri != null) {
                 imgAvatar = photoUri.getPath();
             }
-            FBUser.login(account.getId(), FBUser.TYPE.GOOGLE, account.getDisplayName(), imgAvatar, new FBUser.LoginResult() {
+            User.login(account.getId(), User.TYPE.GOOGLE, account.getDisplayName(), imgAvatar, new User.LoginResult() {
                 @Override
-                public void success(FBUser fbUser) {
+                public void success(User user) {
                     startMainActivity();
                 }
             });
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
-            Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
+            Log.e(TAG, "signInResult:failed code=" + e.toString());
             Toast.makeText(mContext, "signInResult:failed code=" + e.getStatusCode(), Toast.LENGTH_SHORT).show();
         }
     }

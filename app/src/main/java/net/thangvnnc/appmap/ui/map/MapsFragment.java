@@ -10,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -55,8 +54,10 @@ import com.google.firebase.database.ValueEventListener;
 
 import net.thangvnnc.appmap.R;
 import net.thangvnnc.appmap.common.SharedPreferencesManager;
-import net.thangvnnc.appmap.database.FBDirection;
-import net.thangvnnc.appmap.database.FBLocation;
+import net.thangvnnc.appmap.database.Direction;
+import net.thangvnnc.appmap.database.Location;
+import net.thangvnnc.appmap.database.firebase.FBDirection;
+import net.thangvnnc.appmap.database.firebase.FBLocation;
 import net.thangvnnc.appmap.databinding.FragmentMapsBinding;
 import net.thangvnnc.appmap.service.GPSService;
 import net.thangvnnc.appmap.ui.stores.locations.LocationDetailsActivity;
@@ -138,7 +139,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         getCurrentLocation();
     }
 
-    private FBLocation[] fbLocations = {null, null};
+    private Location[] locations = {null, null};
     private void showDirectionFromStore(String directionId) {
         FBDirection.getChild().child(directionId).addValueEventListener(valueEventListener);
     }
@@ -146,16 +147,16 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     private ValueEventListener valueEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull DataSnapshot snapshot) {
-            FBDirection fbDirection = snapshot.getValue(FBDirection.class);
-            FBDirection.getChild().child(fbDirection.id).removeEventListener(valueEventListener);
-            fbDirection.orderByNum++;
-            fbDirection.insertOrUpdate();
-            if (fbDirection != null) {
-                String startLocationId = fbDirection.locations.get(0);
+            Direction direction = snapshot.getValue(Direction.class);
+            FBDirection.getChild().child(direction.id).removeEventListener(valueEventListener);
+            direction.orderByNum++;
+            FBDirection.insertOrUpdate(direction);
+            if (direction != null) {
+                String startLocationId = direction.locations.get(0);
                 FBLocation.getChild().child(startLocationId).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        fbLocations[0] = snapshot.getValue(FBLocation.class);
+                        locations[0] = snapshot.getValue(Location.class);
                         checkAndDrawDirectionFromStore();
                     }
 
@@ -165,11 +166,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
                     }
                 });
 
-                String endLocationId = fbDirection.locations.get(1);
+                String endLocationId = direction.locations.get(1);
                 FBLocation.getChild().child(endLocationId).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        fbLocations[1] = snapshot.getValue(FBLocation.class);
+                        locations[1] = snapshot.getValue(Location.class);
                         checkAndDrawDirectionFromStore();
                     }
 
@@ -188,11 +189,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
     };
 
     private void checkAndDrawDirectionFromStore() {
-        if ((fbLocations[0] != null) && (fbLocations[1] != null)) {
-            LatLng latLngStart = new LatLng(fbLocations[0].lat, fbLocations[0].lng);
-            LatLng latLngEnd = new LatLng(fbLocations[1].lat, fbLocations[1].lng);
+        if ((locations[0] != null) && (locations[1] != null)) {
+            LatLng latLngStart = new LatLng(locations[0].lat, locations[0].lng);
+            LatLng latLngEnd = new LatLng(locations[1].lat, locations[1].lng);
             drawDirection(latLngStart, latLngEnd);
-            fbLocations = new FBLocation[]{null, null};
+            locations = new Location[]{null, null};
         }
     }
 
@@ -310,11 +311,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         @Override
         public void onClick(View v) {
             Marker marker = mMarkerTargetLocations.get(0);
-            FBLocation fbLocation = new FBLocation();
-            fbLocation.lat = (float) marker.getPosition().latitude;
-            fbLocation.lng = (float) marker.getPosition().longitude;
+            Location location = new Location();
+            location.lat = (float) marker.getPosition().latitude;
+            location.lng = (float) marker.getPosition().longitude;
             Intent intent = new Intent(mContext, LocationDetailsActivity.class);
-            intent.putExtra(LocationDetailsActivity.LOCATION_DETAIL, fbLocation);
+            intent.putExtra(LocationDetailsActivity.LOCATION_DETAIL, location);
             startActivity(intent);
         }
     };
@@ -477,7 +478,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
 
     private final LocationListener mLocationListener = new LocationListener() {
         @Override
-        public void onLocationChanged(@NonNull Location location) {
+        public void onLocationChanged(@NonNull android.location.Location location) {
             if (mBind.swSync.isChecked()) {
                 LatLng currentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
@@ -525,7 +526,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
-            Location location = mLocationManager.getLastKnownLocation(provider);
+            android.location.Location location = mLocationManager.getLastKnownLocation(provider);
             if (location != null) {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15));
             }

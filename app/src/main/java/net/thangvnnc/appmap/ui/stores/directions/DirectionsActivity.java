@@ -9,11 +9,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -21,7 +19,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.database.DataSnapshot;
@@ -29,19 +26,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import net.thangvnnc.appmap.R;
-import net.thangvnnc.appmap.database.FBDirection;
-import net.thangvnnc.appmap.database.FBLocation;
+import net.thangvnnc.appmap.database.Direction;
+import net.thangvnnc.appmap.database.Location;
+import net.thangvnnc.appmap.database.firebase.FBDirection;
+import net.thangvnnc.appmap.database.firebase.FBLocation;
 import net.thangvnnc.appmap.databinding.ActivityDirectionsBinding;
 import net.thangvnnc.appmap.databinding.ActivityDirectionsItemBinding;
-import net.thangvnnc.appmap.databinding.ActivityLocationsItemBinding;
-import net.thangvnnc.appmap.ui.stores.locations.LocationDetailsActivity;
-import net.thangvnnc.appmap.ui.stores.locations.LocationsActivity;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Semaphore;
 
 public class DirectionsActivity extends AppCompatActivity {
     public static final String PACKAGE_BROADCAST = "net.thangvnnc.appmap.ui.stores.directions.DirectionsActivity";
@@ -49,7 +42,7 @@ public class DirectionsActivity extends AppCompatActivity {
     private static final String TAG = "DirectionsActivity";
     private ActivityDirectionsBinding mBind = null;
     private Context mContext = null;
-    private final List<FBDirection> fbDirections = new ArrayList<>();
+    private final List<Direction> directions = new ArrayList<>();
     private DirectionsAdapter mDirectionsAdapter = null;
 
     @Override
@@ -69,7 +62,7 @@ public class DirectionsActivity extends AppCompatActivity {
     private void initRcvDirections() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
         mBind.rcvDirections.setLayoutManager(layoutManager);
-        mDirectionsAdapter = new DirectionsAdapter(fbDirections);
+        mDirectionsAdapter = new DirectionsAdapter(directions);
         mBind.rcvDirections.setAdapter(mDirectionsAdapter);
 
         DividerItemDecoration itemDecorator = new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL);
@@ -79,9 +72,9 @@ public class DirectionsActivity extends AppCompatActivity {
         FBDirection.getAll().addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                fbDirections.clear();
-                fbDirections.addAll(FBDirection.parseDirections(true, snapshot));
-//                Collections.reverse(fbDirections);
+                directions.clear();
+                directions.addAll(FBDirection.parseDirections(true, snapshot));
+//                Collections.reverse(directions);
                 mDirectionsAdapter.notifyDataSetChanged();
                 progressDialog.dismiss();
             }
@@ -103,7 +96,7 @@ public class DirectionsActivity extends AppCompatActivity {
     }
 
     private class DirectionsAdapter extends RecyclerView.Adapter<DirectionsAdapter.DirectionsViewHolder> {
-        private List<FBDirection> fbDirections = null;
+        private List<Direction> directions = null;
 
         private class DirectionsViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
             private ActivityDirectionsItemBinding mItemBind = null;
@@ -126,7 +119,7 @@ public class DirectionsActivity extends AppCompatActivity {
                 public boolean onMenuItemClick(MenuItem item) {
                     int idItem = item.getItemId();
                     int position = item.getOrder();
-                    FBDirection fbDirection = fbDirections.get(position);
+                    Direction direction = directions.get(position);
 
                     switch (idItem) {
                         case MENU_ITEM_REMOVE:
@@ -136,7 +129,7 @@ public class DirectionsActivity extends AppCompatActivity {
                             materialAlertDialogBuilder.setPositiveButton(R.string.confirm_btn_ok, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    fbDirection.remove();
+                                    FBDirection.removeById(direction.id);
                                 }
                             });
                             materialAlertDialogBuilder.setNegativeButton(R.string.confirm_btn_no, null);
@@ -151,8 +144,8 @@ public class DirectionsActivity extends AppCompatActivity {
             };
         }
 
-        public DirectionsAdapter(List<FBDirection> fbDirections){
-            this.fbDirections = fbDirections;
+        public DirectionsAdapter(List<Direction> directions){
+            this.directions = directions;
         }
 
         @NonNull
@@ -164,14 +157,14 @@ public class DirectionsActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(DirectionsAdapter.DirectionsViewHolder holder, int position){
-            FBDirection fbDirection = fbDirections.get(position);
-            String locationIdFirst = fbDirection.locations.get(0);
+            Direction direction = directions.get(position);
+            String locationIdFirst = direction.locations.get(0);
 
             FBLocation.getChild().child(locationIdFirst).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    FBLocation fbLocationFrom = snapshot.getValue(FBLocation.class);
-                    holder.mItemBind.txtFromName.setText(fbLocationFrom.name);
+                    Location locationFrom = snapshot.getValue(Location.class);
+                    holder.mItemBind.txtFromName.setText(locationFrom.name);
                 }
 
                 @Override
@@ -180,12 +173,12 @@ public class DirectionsActivity extends AppCompatActivity {
                 }
             });
 
-            String locationIdLast = fbDirection.locations.get(fbDirection.locations.size() - 1);
+            String locationIdLast = direction.locations.get(direction.locations.size() - 1);
             FBLocation.getChild().child(locationIdLast).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    FBLocation fbLocationTo = snapshot.getValue(FBLocation.class);
-                    holder.mItemBind.txtToName.setText(fbLocationTo.name);
+                    Location locationTo = snapshot.getValue(Location.class);
+                    holder.mItemBind.txtToName.setText(locationTo.name);
                 }
 
                 @Override
@@ -198,7 +191,7 @@ public class DirectionsActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(PACKAGE_BROADCAST);
-                    intent.putExtra("directionId", fbDirection.id);
+                    intent.putExtra("directionId", direction.id);
                     LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
                     finish();
                 }
@@ -215,7 +208,7 @@ public class DirectionsActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount(){
-            return fbDirections.size();
+            return directions.size();
         }
     }
 }

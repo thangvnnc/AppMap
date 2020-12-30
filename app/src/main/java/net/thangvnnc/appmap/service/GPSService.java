@@ -37,7 +37,7 @@ public class GPSService extends Service {
     public static final String KEY_BROADCAST_LOCATION = "net.thangvnnc.appmap.gpsservice";
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationRequest mLocationRequest;
-    private static final String LOGSERVICE = "GPSService";
+    private static final String TAG = GPSService.class.getName();
 
     public static boolean isRunning(Context context, Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
@@ -61,7 +61,7 @@ public class GPSService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(LOGSERVICE, "onCreate");
+        Log.i(TAG, "onCreate");
 
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -78,8 +78,8 @@ public class GPSService extends Service {
         mFusedLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                Log.i(LOGSERVICE, "lat " + location.getLatitude());
-                Log.i(LOGSERVICE, "lng " + location.getLongitude());
+                Log.i(TAG, "lat " + location.getLatitude());
+                Log.i(TAG, "lng " + location.getLongitude());
             }
         });
 
@@ -88,14 +88,14 @@ public class GPSService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(LOGSERVICE, "onStartCommand");
+        Log.i(TAG, "onStartCommand");
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.i(LOGSERVICE, "onDestroy");
+        Log.i(TAG, "onDestroy");
         stopLocationUpdates();
     }
 

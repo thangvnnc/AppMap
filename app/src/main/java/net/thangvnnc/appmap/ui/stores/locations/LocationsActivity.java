@@ -23,7 +23,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.database.DataSnapshot;
@@ -31,9 +30,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import net.thangvnnc.appmap.R;
-import net.thangvnnc.appmap.database.FBDirection;
-import net.thangvnnc.appmap.database.FBLocation;
-import net.thangvnnc.appmap.database.FBUser;
+import net.thangvnnc.appmap.common.DateUtils;
+import net.thangvnnc.appmap.database.Direction;
+import net.thangvnnc.appmap.database.Location;
+import net.thangvnnc.appmap.database.User;
+import net.thangvnnc.appmap.database.firebase.FBDirection;
+import net.thangvnnc.appmap.database.firebase.FBLocation;
+import net.thangvnnc.appmap.database.sqlite3.SQLiLocation;
 import net.thangvnnc.appmap.databinding.ActivityLocationsBinding;
 import net.thangvnnc.appmap.databinding.ActivityLocationsItemBinding;
 
@@ -41,14 +44,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static net.thangvnnc.appmap.database.FirebaseDB.generalId;
-
 public class LocationsActivity extends AppCompatActivity {
     private static final String TAG = "LocationsActivity";
     private ActivityLocationsBinding mBind = null;
     private Context mContext = null;
     private final List<Integer> positionSelected = new ArrayList<>();
-    private final List<FBLocation> fbLocations = new ArrayList<>();
+    private final List<Location> locations = new ArrayList<>();
     private LocationsAdapter mLocationsAdapter = null;
 
     @Override
@@ -71,44 +72,38 @@ public class LocationsActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             List<String> locationIds = new ArrayList<>();
-            locationIds.add(fbLocations.get(positionSelected.get(0)).id);
-            locationIds.add(fbLocations.get(positionSelected.get(1)).id);
+            locationIds.add(locations.get(positionSelected.get(0)).id);
+            locationIds.add(locations.get(positionSelected.get(1)).id);
             saveDirection(locationIds);
         }
     };
 
     private void saveDirection(List<String> locationIds) {
-        FBDirection fbDirection = new FBDirection();
-        fbDirection.locations = new ArrayList<>();
-        fbDirection.locations.addAll(locationIds);
-        fbDirection.locationDetails = new ArrayList<>();
-        fbDirection.isUsing = true;
-        fbDirection.updatedBy = FBUser.getSession().id;
-        fbDirection.updatedAt = new Date();
+        Direction direction = new Direction();
+        direction.locations = new ArrayList<>();
+        direction.locations.addAll(locationIds);
+        direction.locationDetails = new ArrayList<>();
+        direction.isUsing = true;
+        direction.updatedBy = User.getSession().id;
+        direction.updatedAt = DateUtils.getCurrent();
 
         // Insert new
-        if (fbDirection.id == null) {
-            fbDirection.id = generalId();
-            fbDirection.createdBy = FBUser.getSession().id;
-            fbDirection.createdAt = new Date();
+        if (direction.id == null) {
+            direction.id = Direction.generalId();
+            direction.createdBy = User.getSession().id;
+            direction.createdAt = DateUtils.getCurrent();
         }
 
         ProgressDialog progressDialog = ProgressDialog.show(mContext, null, mContext.getString(R.string.message_waiting));
         MaterialAlertDialogBuilder materialAlertDialogBuilder = new MaterialAlertDialogBuilder(mContext);
-        fbDirection.insertOrUpdate().addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                materialAlertDialogBuilder.setMessage(R.string.message_success);
-                materialAlertDialogBuilder.setPositiveButton(R.string.alert_dialog_button_ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        positionSelected.clear();
-                        mLocationsAdapter.notifyDataSetChanged();
-                    }
-                });
-                materialAlertDialogBuilder.show();
-            }
+        FBDirection.insertOrUpdate(direction).addOnSuccessListener(aVoid -> {
+            materialAlertDialogBuilder.setMessage(R.string.message_success);
+            materialAlertDialogBuilder.setPositiveButton(R.string.alert_dialog_button_ok, (dialog, which) -> {
+                dialog.dismiss();
+                positionSelected.clear();
+                mLocationsAdapter.notifyDataSetChanged();
+            });
+            materialAlertDialogBuilder.show();
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
@@ -137,9 +132,9 @@ public class LocationsActivity extends AppCompatActivity {
 //        FBDirection.getChild().addListenerForSingleValueEvent(new ValueEventListener() {
 //            @Override
 //            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                List<FBDirection> fbDirections = new ArrayList<>();
+//                List<Direction> fbDirections = new ArrayList<>();
 //                for (DataSnapshot postSnapshot: dataSnapshot.getChildren()) {
-//                    FBDirection fbDirectionSet = postSnapshot.getValue(FBDirection.class);
+//                    Direction fbDirectionSet = postSnapshot.getValue(Direction.class);
 //                }
 //            }
 //
@@ -160,7 +155,7 @@ public class LocationsActivity extends AppCompatActivity {
     private void initRcvLocationDetails() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(mContext);
         mBind.rcvLocations.setLayoutManager(layoutManager);
-        mLocationsAdapter = new LocationsAdapter(fbLocations);
+        mLocationsAdapter = new LocationsAdapter(locations);
         mBind.rcvLocations.setAdapter(mLocationsAdapter);
 
         DividerItemDecoration itemDecorator = new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL);
@@ -170,8 +165,9 @@ public class LocationsActivity extends AppCompatActivity {
         FBLocation.getAll().addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                fbLocations.clear();
-                fbLocations.addAll(FBLocation.parseLocations(true, snapshot));
+                locations.clear();
+                locations.addAll(Location.parseLocations(true, snapshot));
+//                SQLiLocation.getDao().inserts(locations);
                 mLocationsAdapter.notifyDataSetChanged();
                 progressDialog.dismiss();
             }
@@ -193,7 +189,7 @@ public class LocationsActivity extends AppCompatActivity {
     }
 
     private class LocationsAdapter extends RecyclerView.Adapter<LocationsAdapter.LocationsViewHolder> {
-        private List<FBLocation> fbLocations = null;
+        private List<Location> locations = null;
 
         private class LocationsViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
             private ActivityLocationsItemBinding mItemBind = null;
@@ -215,44 +211,36 @@ public class LocationsActivity extends AppCompatActivity {
                 btnRemoveMenuItem.setOnMenuItemClickListener(onMenuItemClickListener);
             }
 
-            private final MenuItem.OnMenuItemClickListener onMenuItemClickListener = new MenuItem.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    int idItem = item.getItemId();
-                    int position = item.getOrder();
-                    FBLocation fbLocation = fbLocations.get(position);
+            private final MenuItem.OnMenuItemClickListener onMenuItemClickListener = item -> {
+                int idItem = item.getItemId();
+                int position = item.getOrder();
+                Location location = locations.get(position);
 
-                    switch (idItem) {
-                        case MENU_ITEM_EDIT:
-                            Intent intent = new Intent(mContext, LocationDetailsActivity.class);
-                            intent.putExtra(LocationDetailsActivity.LOCATION_DETAIL, fbLocation);
-                            startActivity(intent);
-                            break;
+                switch (idItem) {
+                    case MENU_ITEM_EDIT:
+                        Intent intent = new Intent(mContext, LocationDetailsActivity.class);
+                        intent.putExtra(LocationDetailsActivity.LOCATION_DETAIL, location);
+                        startActivity(intent);
+                        break;
 
-                        case MENU_ITEM_REMOVE:
-                            MaterialAlertDialogBuilder materialAlertDialogBuilder = new MaterialAlertDialogBuilder(mContext);
-                            materialAlertDialogBuilder.setTitle(R.string.confirm_title_remove);
-                            materialAlertDialogBuilder.setMessage(R.string.confirm_content_remove);
-                            materialAlertDialogBuilder.setPositiveButton(R.string.confirm_btn_ok, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    fbLocation.remove();
-                                }
-                            });
-                            materialAlertDialogBuilder.setNegativeButton(R.string.confirm_btn_no, null);
-                            materialAlertDialogBuilder.show();
-                            break;
+                    case MENU_ITEM_REMOVE:
+                        MaterialAlertDialogBuilder materialAlertDialogBuilder = new MaterialAlertDialogBuilder(mContext);
+                        materialAlertDialogBuilder.setTitle(R.string.confirm_title_remove);
+                        materialAlertDialogBuilder.setMessage(R.string.confirm_content_remove);
+                        materialAlertDialogBuilder.setPositiveButton(R.string.confirm_btn_ok, (dialog, which) -> FBLocation.removeById(location.id));
+                        materialAlertDialogBuilder.setNegativeButton(R.string.confirm_btn_no, null);
+                        materialAlertDialogBuilder.show();
+                        break;
 
-                        default:
-                            break;
-                    }
-                    return true;
+                    default:
+                        break;
                 }
+                return true;
             };
         }
 
-        public LocationsAdapter(List<FBLocation> fbLocations){
-            this.fbLocations = fbLocations;
+        public LocationsAdapter(List<Location> locations){
+            this.locations = locations;
         }
 
         @NonNull
@@ -264,9 +252,9 @@ public class LocationsActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(LocationsAdapter.LocationsViewHolder holder, int position){
-            FBLocation fbLocation = fbLocations.get(position);
-            holder.mItemBind.txtLocationName.setText(fbLocation.name);
-            holder.mItemBind.txtLocationDescription.setText(fbLocation.description);
+            Location location = locations.get(position);
+            holder.mItemBind.txtLocationName.setText(location.name);
+            holder.mItemBind.txtLocationDescription.setText(location.description);
             holder.mItemBind.icSeleted.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -313,7 +301,7 @@ public class LocationsActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount(){
-            return fbLocations.size();
+            return locations.size();
         }
     }
 }

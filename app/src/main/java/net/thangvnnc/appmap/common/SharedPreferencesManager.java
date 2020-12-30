@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class SharedPreferencesManager {
+    public static final String SESSION_USER_LOGIN = "SESSION_USER_LOGIN";
     public static final String SELECTED_DIRECTION_ID = "SELECTED_DIRECTION_ID";
     private static final String APP_SETTINGS = "APP_PREFERENCES";
 

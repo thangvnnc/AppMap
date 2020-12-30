@@ -3,7 +3,6 @@ package net.thangvnnc.appmap.ui.main;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,15 +11,13 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import net.thangvnnc.appmap.R;
-import net.thangvnnc.appmap.database.FBUser;
+import net.thangvnnc.appmap.database.User;
 import net.thangvnnc.appmap.databinding.ActivityMainBaseBinding;
 import net.thangvnnc.appmap.service.GPSService;
+import net.thangvnnc.appmap.service.SyncDBService;
 
 public class MainBaseActivity extends AppCompatActivity {
     private static final String TAG = "MainBaseActivity";
@@ -41,8 +38,19 @@ public class MainBaseActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(mBind.navView, navController);
+        runService();
+
+//        List<Location> all = SQLiLocation.getDao().getAll();
+//        Log.e("item location: ", String.valueOf(all.size()));
+    }
+
+    private void runService() {
         if (!GPSService.isRunning(this, GPSService.class)) {
             GPSService.startService(this);
+        }
+
+        if (!SyncDBService.isRunning(this, SyncDBService.class)) {
+            SyncDBService.startService(this);
         }
     }
 
@@ -54,7 +62,7 @@ public class MainBaseActivity extends AppCompatActivity {
         materialAlertDialogBuilder.setPositiveButton(R.string.confirm_btn_ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                FBUser.logout(mContext);
+                User.logout(mContext);
                 finish();
             }
         });
